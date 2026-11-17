@@ -26,6 +26,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,7 +34,6 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.security.KeyStore;
 import java.security.cert.Certificate;
@@ -154,11 +154,11 @@ public class SmallFileMgr {
             }
 
             String finalFilePath = localDir + File.separator + fileId + "." + md5;
-            File finalFile = new File(finalFilePath);
+            File finalFile = toFile(finalFilePath);
 
             // 3. Disk cache hit — avoid downloading again after process restart
             if (finalFile.exists()) {
-                try (FileInputStream fis = new FileInputStream(finalFile)) {
+                try (FileInputStream fis = openInputStream(finalFile)) {
                     String diskMd5 = DigestUtils.md5Hex(fis);
                     if (diskMd5.equalsIgnoreCase(md5)) {
                         LOG.info("SmallFile disk cache hit: {}", finalFilePath);
@@ -195,7 +195,7 @@ public class SmallFileMgr {
                             "Failed to download small file, status=" + statusCode + ", url=" + url);
                 }
                 try (InputStream in = response.getEntity().getContent();
-                        FileOutputStream fos = new FileOutputStream(tmpFile)) {
+                        FileOutputStream fos = openOutputStream(tmpFile)) {
                     byte[] buf = new byte[8192];
                     int n;
                     while ((n = in.read(buf)) != -1) {
@@ -208,7 +208,7 @@ public class SmallFileMgr {
             }
 
             // 5. Verify MD5 of downloaded content
-            try (FileInputStream fis = new FileInputStream(tmpFile)) {
+            try (FileInputStream fis = openInputStream(tmpFile)) {
                 String downloadedMd5 = DigestUtils.md5Hex(fis);
                 if (!downloadedMd5.equalsIgnoreCase(md5)) {
                     tmpFile.delete();
@@ -251,17 +251,17 @@ public class SmallFileMgr {
 
     private static String pkcs12TruststorePath(String pemPath) {
         String cached = PKCS12_CACHE.get(pemPath);
-        if (cached != null && new File(cached).exists()) {
+        if (cached != null && toFile(cached).exists()) {
             return cached;
         }
         Object lock = DOWNLOAD_LOCKS.computeIfAbsent(pemPath + PKCS12_SUFFIX, k -> new Object());
         synchronized (lock) {
             String doubleChecked = PKCS12_CACHE.get(pemPath);
-            if (doubleChecked != null && new File(doubleChecked).exists()) {
+            if (doubleChecked != null && toFile(doubleChecked).exists()) {
                 return doubleChecked;
             }
             String p12Path = pemPath + PKCS12_SUFFIX;
-            if (!new File(p12Path).exists()) {
+            if (!toFile(p12Path).exists()) {
                 convertPemToPkcs12(pemPath, p12Path);
             }
             PKCS12_CACHE.put(pemPath, p12Path);
@@ -272,7 +272,7 @@ public class SmallFileMgr {
     private static void convertPemToPkcs12(String pemPath, String p12Path) {
         Path tmpFile;
         try {
-            Path p12 = Paths.get(p12Path);
+            Path p12 = Path.of(p12Path);
             tmpFile = Files.createTempFile(p12.getParent(), "p12-", ".tmp");
         } catch (IOException e) {
             throw new RuntimeException("Failed to create tmp file for PKCS12 truststore", e);
@@ -281,7 +281,7 @@ public class SmallFileMgr {
             KeyStore keyStore = KeyStore.getInstance("PKCS12");
             keyStore.load(null);
             CertificateFactory cf = CertificateFactory.getInstance("X.509");
-            try (InputStream in = new FileInputStream(pemPath)) {
+            try (InputStream in = openInputStream(toFile(pemPath))) {
                 // A CA PEM may contain a chain (intermediate + root); import each with a
                 // distinct alias, otherwise later entries overwrite earlier ones.
                 int i = 0;
@@ -294,7 +294,7 @@ public class SmallFileMgr {
             }
             Files.move(
                     tmpFile,
-                    Paths.get(p12Path),
+                    Path.of(p12Path),
                     StandardCopyOption.ATOMIC_MOVE,
                     StandardCopyOption.REPLACE_EXISTING);
             LOG.info("Generated PKCS12 truststore: {}", p12Path);
@@ -308,10 +308,26 @@ public class SmallFileMgr {
         }
     }
 
+    private static FileInputStream openInputStream(File file) throws FileNotFoundException {
+        return new FileInputStream(file);
+    }
+
+    private static FileOutputStream openOutputStream(File file) throws FileNotFoundException {
+        return new FileOutputStream(file);
+    }
+
     /** Clears the in-memory cache. Exposed for testing. */
     static void clearCache() {
         MEM_CACHE.clear();
         PKCS12_CACHE.clear();
         DOWNLOAD_LOCKS.clear();
+    }
+
+    /**
+     * Same as {@code new File(path)}; unlike {@code Path.of}, never rejects characters that the
+     * file-name encoding cannot represent.
+     */
+    private static File toFile(CharSequence path) {
+        return new File(path.toString());
     }
 }

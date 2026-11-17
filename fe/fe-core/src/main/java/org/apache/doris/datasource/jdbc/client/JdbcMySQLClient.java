@@ -59,12 +59,14 @@ public class JdbcMySQLClient extends JdbcClient {
         try {
             conn = super.getConnection();
             stmt = conn.createStatement();
-            rs = stmt.executeQuery("SHOW VARIABLES LIKE 'server_identity'");
+            final String serverIdentitySql = "SHOW VARIABLES LIKE 'server_identity'";
+            rs = stmt.executeQuery(serverIdentitySql);
             if (rs.next()) {
                 isDoris = isDorisServerIdentity(rs.getString("Value"));
             } else {
                 close(rs);
-                rs = stmt.executeQuery("SHOW VARIABLES LIKE 'version_comment'");
+                final String versionCommentSql = "SHOW VARIABLES LIKE 'version_comment'";
+                rs = stmt.executeQuery(versionCommentSql);
                 if (rs.next()) {
                     isDoris = isDorisCompatibleVersionComment(rs.getString("Value"));
                 }
@@ -394,7 +396,8 @@ public class JdbcMySQLClient extends JdbcClient {
         try {
             conn = getConnection();
             stmt = conn.createStatement();
-            resultSet = stmt.executeQuery(queryBuf.toString());
+            final String columnsQuery = queryBuf.toString();
+            resultSet = stmt.executeQuery(columnsQuery);
             while (resultSet.next()) {
                 // get column name
                 String fieldName = resultSet.getString("Field");
@@ -409,6 +412,11 @@ public class JdbcMySQLClient extends JdbcClient {
             close(resultSet, stmt, conn);
         }
         return fieldToType;
+    }
+
+    /** Returns the index of the first '(' in a column type name, or -1 when there is none. */
+    private static int indexOfOpenParen(String typeName) {
+        return typeName.indexOf('(');
     }
 
     private Type dorisTypeToDoris(JdbcFieldSchema fieldSchema) {
@@ -428,7 +436,7 @@ public class JdbcMySQLClient extends JdbcClient {
             return ArrayType.create(arrayInnerType, true);
         }
 
-        int openParen = upperType.indexOf("(");
+        int openParen = indexOfOpenParen(upperType);
         String baseType = (openParen == -1) ? upperType : upperType.substring(0, openParen);
 
         switch (baseType) {

@@ -163,10 +163,10 @@ public class DataSourceConfigValidator {
         // jdbc:mysql routes through JdbcMySQLClient so Connector/J is initialized consistently.
         JdbcClient jdbcClient = StreamingJobUtils.getJdbcClient(
                 DataSourceType.OCEANBASE, sourceProperties);
+        final String compatibilityModeSql = "SHOW VARIABLES LIKE 'ob_compatibility_mode'";
         try (Connection connection = jdbcClient.getConnection();
                 Statement statement = connection.createStatement();
-                ResultSet resultSet = statement.executeQuery(
-                        "SHOW VARIABLES LIKE 'ob_compatibility_mode'")) {
+                ResultSet resultSet = statement.executeQuery(compatibilityModeSql)) {
             if (!resultSet.next()) {
                 throw new JobException("Failed to determine OceanBase compatibility mode");
             }

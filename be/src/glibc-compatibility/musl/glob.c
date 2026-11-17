@@ -41,8 +41,9 @@ static int append(struct match **tail, const char *name, size_t len, int mark)
 	if (!new) return -1;
 	(*tail)->next = new;
 	new->next = NULL;
-	strcpy(new->name, name);
-	if (mark) strcat(new->name, "/");
+	size_t name_len = strlen(name);
+	memcpy(new->name, name, name_len + 1);
+	if (mark) memcpy(new->name + name_len, "/", 2);
 	*tail = new;
 	return 0;
 }
@@ -60,7 +61,7 @@ static int match_in_dir(const char *d, const char *p, int flags, int (*errfunc)(
 	int error;
 
 	if ((p2 = strchr(p, '/'))) {
-		strcpy(pat, p);
+		memcpy(pat, p, strlen(p) + 1);
 		pat[p2-p] = 0;
 		for (; *p2 == '/'; p2++);
 		p = pat;
@@ -108,7 +109,7 @@ static int match_in_dir(const char *d, const char *p, int flags, int (*errfunc)(
 		if (*d) {
 			memcpy(name, d, l);
 			name[l] = '/';
-			strcpy(name+l+1, de->d_name);
+			memcpy(name+l+1, de->d_name, strlen(de->d_name) + 1);
 		} else {
 			name = de->d_name;
 		}

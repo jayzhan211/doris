@@ -51,7 +51,8 @@ public class DorisSource extends RichSourceFunction<User> {
         connection = DriverManager.getConnection(properties.getProperty("url"),
                     properties.getProperty("username"),
                     properties.getProperty("password"));
-        ps = connection.prepareStatement(properties.getProperty("sql"));
+        final String querySql = properties.getProperty("sql");
+        ps = connection.prepareStatement(querySql);
     }
 
 

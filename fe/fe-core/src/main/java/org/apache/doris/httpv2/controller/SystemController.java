@@ -45,7 +45,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -187,7 +186,7 @@ public class SystemController extends BaseController {
     }
 
     private String getParentUrl(String pathStr) {
-        Path path = Paths.get(pathStr);
+        Path path = Path.of(pathStr);
         path = path.getParent();
         if (path == null) {
             return "/rest/v1/system";

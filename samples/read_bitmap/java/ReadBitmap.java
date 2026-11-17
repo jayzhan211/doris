@@ -75,7 +75,8 @@ public class ReadBitmap {
              Statement stmt = conn.createStatement()
         ) {
             stmt.execute("set return_object_data_as_binary=true"); // IMPORTANT!!!
-            ResultSet rs = stmt.executeQuery("select uids from t_bitmap");
+            final String selectSql = "select uids from t_bitmap";
+            ResultSet rs = stmt.executeQuery(selectSql);
             while (rs.next()) {
                 byte[] bytes = rs.getBytes(1);
 

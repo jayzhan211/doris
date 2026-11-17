@@ -140,7 +140,8 @@ public class OracleTypeHandler extends DefaultTypeHandler {
                 throw new SQLException("Failed to initialize Oracle session time zone", e);
             }
         }
-        PreparedStatement stmt = conn.prepareStatement(sql,
+        final String querySql = sql;
+        PreparedStatement stmt = conn.prepareStatement(querySql,
                 ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
         stmt.setFetchSize(fetchSize);
         return stmt;

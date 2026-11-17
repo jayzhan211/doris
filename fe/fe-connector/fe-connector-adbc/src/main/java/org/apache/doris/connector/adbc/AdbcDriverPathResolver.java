@@ -23,7 +23,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -111,10 +110,10 @@ public final class AdbcDriverPathResolver {
                 throw new IllegalArgumentException("Invalid '" + AdbcCatalogProperties.DRIVER_URL
                         + "': no path in " + raw);
             }
-            return Paths.get(path);
+            return Path.of(path);
         }
         if (raw.startsWith("/")) {
-            return Paths.get(raw);
+            return Path.of(raw);
         }
         if (!SAFE_DRIVER_FILE_NAME.matcher(raw).matches()) {
             throw new IllegalArgumentException("Invalid '" + AdbcCatalogProperties.DRIVER_URL
@@ -127,7 +126,7 @@ public final class AdbcDriverPathResolver {
                     + "': " + AdbcConf.CONF_DRIVERS_DIR
                     + " is not configured in adbc.conf and DORIS_HOME is unknown");
         }
-        return Paths.get(driversDir.trim(), raw);
+        return Path.of(driversDir.trim(), raw);
     }
 
     /**
@@ -155,7 +154,7 @@ public final class AdbcDriverPathResolver {
         for (String entry : securePath.split(";")) {
             String trimmed = entry.trim();
             if (!trimmed.isEmpty()) {
-                allowed.add(Paths.get(trimmed).normalize());
+                allowed.add(Path.of(trimmed).normalize());
             }
         }
         Path normalized = candidate.normalize();

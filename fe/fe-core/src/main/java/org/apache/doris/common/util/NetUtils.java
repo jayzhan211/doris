@@ -175,4 +175,14 @@ public class NetUtils {
         bytes[3] = (byte) (value & 0xFF);
         return (Inet4Address) Inet4Address.getByAddress(bytes);
     }
+
+    /** Same as {@code new InetSocketAddress(host, port)}: resolves {@code host} immediately. */
+    public static java.net.InetSocketAddress newSocketAddress(String host, int port) {
+        return new java.net.InetSocketAddress(host, port);
+    }
+
+    /** Same as {@code new InetSocketAddress(port)}: the wildcard address on {@code port}. */
+    public static java.net.InetSocketAddress newWildcardSocketAddress(int port) {
+        return new java.net.InetSocketAddress(port);
+    }
 }

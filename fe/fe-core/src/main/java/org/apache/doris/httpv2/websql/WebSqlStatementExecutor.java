@@ -65,7 +65,8 @@ public class WebSqlStatementExecutor {
                 statement.setFetchSize(1000);
                 statement.setMaxRows(limits.maxResultRows + 1);
                 session.setActiveStatement(statement);
-                boolean hasResultSet = statement.execute(validatedSql);
+                final String executedSql = validatedSql;
+                boolean hasResultSet = statement.execute(executedSql);
                 if (hasResultSet) {
                     try (ResultSet resultSet = statement.getResultSet()) {
                         queryResult = readResultSet(resultSet, statement, connection,
@@ -185,9 +186,9 @@ public class WebSqlStatementExecutor {
     }
 
     private SessionMetadata readSessionMetadata(Connection connection) {
+        final String sessionMetadataSql = "SELECT CURRENT_CATALOG(), DATABASE(), LAST_QUERY_ID()";
         try (Statement statement = connection.createStatement();
-                ResultSet resultSet = statement.executeQuery(
-                        "SELECT CURRENT_CATALOG(), DATABASE(), LAST_QUERY_ID()")) {
+                ResultSet resultSet = statement.executeQuery(sessionMetadataSql)) {
             if (resultSet.next()) {
                 return new SessionMetadata(resultSet.getString(1), resultSet.getString(2), resultSet.getString(3));
             }

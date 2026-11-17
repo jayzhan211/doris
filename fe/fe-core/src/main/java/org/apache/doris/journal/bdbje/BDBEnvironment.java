@@ -19,6 +19,7 @@ package org.apache.doris.journal.bdbje;
 
 import org.apache.doris.catalog.Env;
 import org.apache.doris.common.Config;
+import org.apache.doris.common.util.NetUtils;
 import org.apache.doris.ha.BDBHA;
 import org.apache.doris.ha.BDBStateChangeListener;
 import org.apache.doris.ha.FrontendNodeType;
@@ -235,7 +236,7 @@ public class BDBEnvironment {
                 .getFrontends(FrontendNodeType.FOLLOWER)
                 .stream()
                 .filter(Frontend::isAlive)
-                .map(fe -> new InetSocketAddress(fe.getHost(), fe.getEditLogPort()))
+                .map(fe -> NetUtils.newSocketAddress(fe.getHost(), fe.getEditLogPort()))
                 .collect(Collectors.toSet());
 
         if (addresses.isEmpty()) {

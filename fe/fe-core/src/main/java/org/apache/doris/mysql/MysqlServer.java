@@ -19,6 +19,7 @@ package org.apache.doris.mysql;
 
 import org.apache.doris.common.Config;
 import org.apache.doris.common.ThreadPoolManager;
+import org.apache.doris.common.util.NetUtils;
 import org.apache.doris.qe.ConnectScheduler;
 import org.apache.doris.service.FrontendOptions;
 
@@ -78,8 +79,8 @@ public class MysqlServer {
                 server = xnioWorker.createStreamConnectionServer(new InetSocketAddress("::0", port), acceptListener,
                     optionMap);
             } else {
-                server = xnioWorker.createStreamConnectionServer(new InetSocketAddress(port), acceptListener,
-                    optionMap);
+                server = xnioWorker.createStreamConnectionServer(NetUtils.newWildcardSocketAddress(port),
+                    acceptListener, optionMap);
             }
             server.resumeAccepts();
             running = true;

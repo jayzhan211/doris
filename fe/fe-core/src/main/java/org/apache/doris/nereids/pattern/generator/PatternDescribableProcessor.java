@@ -122,9 +122,13 @@ public class PatternDescribableProcessor extends AbstractProcessor {
         }
 
         // bypass create file for processingEnv.getFiler(), compile GeneratePatterns in next compile term
-        try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(generatePatternFile))) {
+        try (BufferedWriter bufferedWriter = new BufferedWriter(openWriter(generatePatternFile))) {
             bufferedWriter.write(generatePatternCode);
         }
+    }
+
+    private static FileWriter openWriter(File file) throws IOException {
+        return new FileWriter(file);
     }
 
     private List<File> findJavaFiles(List<File> dirs) {

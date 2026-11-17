@@ -39,7 +39,8 @@ public class JdbcOceanBaseClient extends JdbcClient {
         try {
             conn = super.getConnection();
             stmt = conn.createStatement();
-            rs = stmt.executeQuery("SHOW VARIABLES LIKE 'ob_compatibility_mode'");
+            final String compatibilityModeSql = "SHOW VARIABLES LIKE 'ob_compatibility_mode'";
+            rs = stmt.executeQuery(compatibilityModeSql);
             if (rs.next()) {
                 String compatibilityMode = rs.getString(2);
                 if ("MYSQL".equalsIgnoreCase(compatibilityMode)) {

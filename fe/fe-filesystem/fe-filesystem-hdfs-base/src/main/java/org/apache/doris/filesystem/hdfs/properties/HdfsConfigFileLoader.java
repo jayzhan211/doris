@@ -17,6 +17,8 @@
 
 package org.apache.doris.filesystem.hdfs.properties;
 
+import org.apache.doris.foundation.util.LocalFiles;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -47,8 +49,9 @@ public final class HdfsConfigFileLoader {
         Configuration conf = new Configuration();
         for (String resource : resourcesPath.split(",")) {
             String resourceName = resource.trim();
-            String path = new File(resourceName).isAbsolute() ? resourceName : dir + resourceName;
-            File file = new File(path);
+            String path = LocalFiles.file(resourceName).isAbsolute()
+                    ? resourceName : dir + resourceName;
+            File file = LocalFiles.file(path);
             if (file.exists() && file.isFile()) {
                 conf.addResource(new Path(file.toURI()));
             } else {

@@ -35,6 +35,7 @@ import org.apache.doris.common.Config;
 import org.apache.doris.common.io.Text;
 import org.apache.doris.common.util.DebugPointUtil;
 import org.apache.doris.common.util.TimeUtils;
+import org.apache.doris.foundation.util.LocalFiles;
 import org.apache.doris.info.TableRefInfo;
 import org.apache.doris.nereids.trees.plans.commands.BackupCommand;
 import org.apache.doris.nereids.trees.plans.commands.BackupCommand.BackupContent;
@@ -1053,7 +1054,7 @@ public class BackupJob extends AbstractJob implements GsonPostProcessable {
     }
 
     private boolean validateLocalFile(String filePath) {
-        File file = new File(filePath);
+        File file = LocalFiles.file(filePath);
         if (!file.exists() || !file.canRead()) {
             status = new Status(ErrCode.COMMON_ERROR, "file is invalid: " + filePath);
             return false;

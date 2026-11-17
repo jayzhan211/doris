@@ -1203,8 +1203,9 @@ public class MySqlSourceReader extends AbstractCdcSourceReader {
         if (MapUtils.isEmpty(request.getReferenceOffset())) {
             return -1;
         }
+        final String showBinaryLogsSql = "SHOW BINARY LOGS";
         try (Statement statement = jdbc.connection().createStatement();
-                ResultSet resultSet = statement.executeQuery("SHOW BINARY LOGS")) {
+                ResultSet resultSet = statement.executeQuery(showBinaryLogsSql)) {
             List<MySqlBinlogLagCalculator.BinlogFile> binlogFiles = new ArrayList<>();
             while (resultSet.next()) {
                 binlogFiles.add(
@@ -1268,7 +1269,7 @@ public class MySqlSourceReader extends AbstractCdcSourceReader {
     protected Class<?> probeSplitKeyClass(
             TableId tableId, Column splitColumn, JobBaseConfig jobConfig) {
         MySqlSourceConfig sourceConfig = getSourceConfig(jobConfig);
-        String sql =
+        final String sql =
                 String.format(
                         "SELECT %s FROM %s WHERE 1=0",
                         StatementUtils.quote(splitColumn.name()), StatementUtils.quote(tableId));

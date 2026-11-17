@@ -197,7 +197,7 @@ public class JdbcDorisConnector implements Connector {
         JdbcDbType dbType = JdbcDbType.parseFromUrl(jdbcUrl);
         String user = props.getUser();
         String password = props.getPassword();
-        String driverUrl = resolveDriverUrl(props.getDriverUrl());
+        String driverUrl = resolveDriverUrl();
         String driverClass = props.getDriverClass();
         int poolMinSize = props.getConnectionPoolMinSize();
         int poolMaxSize = props.getConnectionPoolMaxSize();
@@ -231,12 +231,13 @@ public class JdbcDorisConnector implements Connector {
     }
 
     /**
-     * Resolves driver URL against the configured drivers directory.
+     * Resolves this catalog's driver URL against the configured drivers directory.
      * If the URL is a plain filename (e.g., "mysql-connector-j-8.4.0.jar"),
      * resolves it under {@code drivers_dir} from this plugin's jdbc.conf, or fe.conf's
      * {@code jdbc_drivers_dir}.
      */
-    private String resolveDriverUrl(String driverUrl) {
+    private String resolveDriverUrl() {
+        String driverUrl = props.getDriverUrl();
         if (driverUrl == null || driverUrl.isEmpty()) {
             return driverUrl;
         }

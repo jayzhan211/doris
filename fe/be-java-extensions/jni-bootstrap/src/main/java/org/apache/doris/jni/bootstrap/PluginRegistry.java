@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Map;
 
 /**
@@ -202,7 +201,7 @@ public final class PluginRegistry {
             return configured;
         }
         if (hadoopConfDirEnv != null && !hadoopConfDirEnv.trim().isEmpty()) {
-            Path fallback = Paths.get(hadoopConfDirEnv.trim());
+            Path fallback = Path.of(hadoopConfDirEnv.trim());
             if (Files.isDirectory(fallback)) {
                 return fallback;
             }
@@ -231,7 +230,7 @@ public final class PluginRegistry {
         if (property == null || property.trim().isEmpty()) {
             return false;
         }
-        return !Paths.get(property.trim()).equals(defaultDir);
+        return !Path.of(property.trim()).equals(defaultDir);
     }
 
     /** Whether the directory holds anything at all; an empty drop point is not an answer. */
@@ -251,7 +250,7 @@ public final class PluginRegistry {
     private static Path directory(String property, String defaultSubdir) {
         String configured = System.getProperty(property);
         if (configured != null && !configured.trim().isEmpty()) {
-            return Paths.get(configured.trim());
+            return Path.of(configured.trim());
         }
         return defaultDirectory(defaultSubdir);
     }
@@ -260,8 +259,8 @@ public final class PluginRegistry {
     private static Path defaultDirectory(String defaultSubdir) {
         String dorisHome = System.getenv("DORIS_HOME");
         if (dorisHome != null && !dorisHome.trim().isEmpty()) {
-            return Paths.get(dorisHome.trim(), defaultSubdir);
+            return Path.of(dorisHome.trim(), defaultSubdir);
         }
-        return Paths.get(new File("").getAbsolutePath(), defaultSubdir);
+        return Path.of(new File("").getAbsolutePath(), defaultSubdir);
     }
 }

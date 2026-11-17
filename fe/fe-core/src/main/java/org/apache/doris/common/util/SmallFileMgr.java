@@ -47,7 +47,7 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.util.Base64;
 import java.util.List;
@@ -374,7 +374,7 @@ public class SmallFileMgr {
     }
 
     private File getAbsoluteFile(long dbId, String catalog, String fileName) {
-        return Paths.get(Config.small_file_dir, String.valueOf(dbId), catalog, fileName)
+        return Path.of(Config.small_file_dir, String.valueOf(dbId), catalog, fileName)
                 .normalize().toAbsolutePath().toFile();
     }
 

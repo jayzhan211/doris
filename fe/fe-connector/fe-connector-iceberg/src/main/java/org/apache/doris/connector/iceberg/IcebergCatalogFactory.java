@@ -27,6 +27,7 @@ import org.apache.doris.filesystem.gcs.auth.GcsAuth;
 import org.apache.doris.filesystem.gcs.auth.GcsAuthResolver;
 import org.apache.doris.filesystem.properties.S3CompatibleFileSystemProperties;
 import org.apache.doris.filesystem.properties.StorageProperties;
+import org.apache.doris.foundation.util.LocalFiles;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -817,7 +818,7 @@ public final class IcebergCatalogFactory {
         String baseDir = resolveHadoopConfigDir();
         for (String resource : confResources.split(",")) {
             String resourcePath = baseDir + resource.trim();
-            File file = new File(resourcePath);
+            File file = LocalFiles.file(resourcePath);
             if (file.exists() && file.isFile()) {
                 hiveConf.addResource(new Path(file.toURI()));
             } else {

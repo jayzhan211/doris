@@ -21,6 +21,7 @@ import org.apache.doris.common.AnalysisException;
 import org.apache.doris.common.Config;
 import org.apache.doris.common.ErrorCode;
 import org.apache.doris.common.ErrorReport;
+import org.apache.doris.foundation.util.LocalFiles;
 import org.apache.doris.qe.GlobalVariable;
 
 import com.google.common.base.Strings;
@@ -29,10 +30,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -141,7 +144,7 @@ public class MysqlPassword {
         }
 
         // Construct full path: security_plugins_dir/<configured_file_name> and normalize for safe comparison
-        String configuredFilePath = Paths.get(Config.security_plugins_dir, configuredFileName)
+        String configuredFilePath = Path.of(Config.security_plugins_dir, configuredFileName)
                 .normalize().toString();
 
         // Check if we need to (re)load the dictionary
@@ -168,7 +171,7 @@ public class MysqlPassword {
      */
     private static Set<String> loadDictionaryFromFile(String filePath) {
         Set<String> words = new HashSet<>();
-        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+        try (BufferedReader reader = new BufferedReader(openReader(LocalFiles.file(filePath)))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 line = line.trim();
@@ -184,6 +187,10 @@ public class MysqlPassword {
                     filePath, e.getMessage());
             return null;
         }
+    }
+
+    private static FileReader openReader(File file) throws FileNotFoundException {
+        return new FileReader(file);
     }
 
     public static byte[] createRandomString(int len) {

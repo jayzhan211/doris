@@ -17,7 +17,6 @@
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -103,7 +102,7 @@ public final class IcebergEncryptionFixture {
             throw new IllegalArgumentException("Expected HMS URI, KMS endpoint, S3 endpoint and test key state");
         }
         IcebergEncryptionFixture fixture = new IcebergEncryptionFixture(args);
-        HttpServer server = HttpServer.create(new InetSocketAddress(8181), 0);
+        HttpServer server = HttpServer.create(new java.net.InetSocketAddress(8181), 0);
         ExecutorService executor = Executors.newFixedThreadPool(4);
         server.setExecutor(executor);
         server.createContext("/health", request -> reply(request, 200, "{\"ready\":true}"));

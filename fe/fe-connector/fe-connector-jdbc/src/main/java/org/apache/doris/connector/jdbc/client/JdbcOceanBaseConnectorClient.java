@@ -75,7 +75,8 @@ public class JdbcOceanBaseConnectorClient extends JdbcConnectorClient {
         try {
             conn = getConnection();
             stmt = conn.createStatement();
-            rs = stmt.executeQuery("SELECT ob_compatibility_mode()");
+            final String compatibilityModeSql = "SELECT ob_compatibility_mode()";
+            rs = stmt.executeQuery(compatibilityModeSql);
             if (rs.next()) {
                 String mode = rs.getString(1);
                 if ("ORACLE".equalsIgnoreCase(mode)) {

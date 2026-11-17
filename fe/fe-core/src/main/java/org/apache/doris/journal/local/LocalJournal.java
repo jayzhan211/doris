@@ -59,7 +59,7 @@ public class LocalJournal implements Journal {
                 if (storage.getEditsSeq() == 0) {
                     // there is no edits file, create first one
                     Preconditions.checkState(id == 1, id);
-                    currentEditFile = new File(imageDir, "edits.1");
+                    currentEditFile = storage.getEditsFile(1);
                     currentEditFile.createNewFile();
                     outputStream = new EditLogFileOutputStream(currentEditFile);
                 } else if (id == storage.getEditsSeq()) {
@@ -68,7 +68,7 @@ public class LocalJournal implements Journal {
                     this.outputStream = new EditLogFileOutputStream(currentEditFile);
                 } else {
                     // create next edits file
-                    currentEditFile = new File(imageDir, "edits." + (id + 1));
+                    currentEditFile = storage.getEditsFile(id + 1);
                     currentEditFile.createNewFile();
                     outputStream = new EditLogFileOutputStream(currentEditFile);
                 }
@@ -91,7 +91,7 @@ public class LocalJournal implements Journal {
                 outputStream.flush();
                 outputStream.close();
             }
-            currentEditFile = new File(imageDir, "edits." + journalId.get());
+            currentEditFile = storage.getEditsFile(journalId.get());
             currentEditFile.createNewFile();
             outputStream = new EditLogFileOutputStream(currentEditFile);
         } catch (IOException e) {
@@ -171,7 +171,7 @@ public class LocalJournal implements Journal {
             List<Long> numbers = storage.getEditsFileSequenceNumbers();
             for (long number : numbers) {
                 if (number < deleteJournalToId) {
-                    File file = new File(imageDir, "edits." + number);
+                    File file = storage.getEditsFile(number);
                     if (file.exists()) {
                         file.delete();
                     }

@@ -212,7 +212,8 @@ public class MySQLTypeHandler extends DefaultTypeHandler {
                                                  int fetchSize) throws SQLException {
         initializeWriteConnection(conn);
         conn.setAutoCommit(false);
-        PreparedStatement stmt = conn.prepareStatement(sql,
+        final String querySql = sql;
+        PreparedStatement stmt = conn.prepareStatement(querySql,
                 ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
         // MySQL: Integer.MIN_VALUE signals streaming results to avoid OOM
         stmt.setFetchSize(Integer.MIN_VALUE);

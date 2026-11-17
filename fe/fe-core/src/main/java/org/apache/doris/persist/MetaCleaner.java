@@ -17,6 +17,8 @@
 
 package org.apache.doris.persist;
 
+import org.apache.doris.foundation.util.LocalFiles;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -39,7 +41,7 @@ public class MetaCleaner {
 
         File currentImage = storage.getImageFile(currentVersion);
         if (currentImage.exists()) {
-            File metaDir = new File(imageDir);
+            File metaDir = LocalFiles.file(imageDir);
             File[] children = metaDir.listFiles();
 
             // Iterate all file in metaDir
@@ -69,7 +71,7 @@ public class MetaCleaner {
     }
 
     public void cleanTheLatestInvalidImageFile(String path) throws IOException {
-        File latestInvalidImage = new File(path);
+        File latestInvalidImage = LocalFiles.file(path);
         if (latestInvalidImage.exists()) {
             if (latestInvalidImage.delete()) {
                 LOG.info(latestInvalidImage.getAbsoluteFile() + " deleted.");

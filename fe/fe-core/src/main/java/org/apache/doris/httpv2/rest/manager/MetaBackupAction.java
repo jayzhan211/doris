@@ -111,7 +111,7 @@ public class MetaBackupAction extends RestBaseController {
             if (req == null || Strings.isNullOrEmpty(req.getTargetDir())) {
                 return ResponseEntityBuilder.badRequest("target_dir is required");
             }
-            File targetDir = prepareTargetDir(req.getTargetDir());
+            File targetDir = prepareTargetDir(new File(req.getTargetDir()));
             if (Env.getCurrentEnv().getCheckpointer() != null) {
                 Env.getCurrentEnv().getCheckpointer().getLock().readLock().lock();
             }
@@ -184,8 +184,8 @@ public class MetaBackupAction extends RestBaseController {
         }
     }
 
-    private static File prepareTargetDir(String targetDir) throws IOException {
-        File dir = new File(targetDir).getCanonicalFile();
+    private static File prepareTargetDir(File targetDir) throws IOException {
+        File dir = targetDir.getCanonicalFile();
         if (dir.exists()) {
             if (!dir.isDirectory()) {
                 throw new IOException("target_dir exists but is not a directory: " + dir.getAbsolutePath());

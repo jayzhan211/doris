@@ -38,6 +38,7 @@ import org.apache.doris.filesystem.FileIterator;
 import org.apache.doris.filesystem.GlobListing;
 import org.apache.doris.filesystem.Location;
 import org.apache.doris.foundation.fs.FsStorageType;
+import org.apache.doris.foundation.util.LocalFiles;
 import org.apache.doris.fs.FileSystemDescriptor;
 import org.apache.doris.fs.FileSystemFactory;
 import org.apache.doris.persist.gson.GsonPostProcessable;
@@ -66,7 +67,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -359,10 +360,14 @@ public class Repository implements Writable, GsonPostProcessable {
     private static void spiUploadFile(org.apache.doris.filesystem.FileSystem fs,
             String localFilePath, String remotePath) throws IOException {
         DorisOutputFile outputFile = fs.newOutputFile(Location.of(remotePath));
-        try (java.io.InputStream in = Files.newInputStream(Paths.get(localFilePath));
+        try (java.io.InputStream in = Files.newInputStream(Path.of(localFilePath));
                 java.io.OutputStream out = outputFile.create()) {
             copyStream(in, out);
         }
+    }
+
+    private static FileInputStream openInputStream(File file) throws FileNotFoundException {
+        return new FileInputStream(file);
     }
 
     /** Copies all bytes from {@code in} to {@code out} (Java-8-compatible alternative to transferTo). */
@@ -398,10 +403,10 @@ public class Repository implements Writable, GsonPostProcessable {
                 try {
                     DorisInputFile inputFile = fs.newInputFile(Location.of(repoInfoFilePath));
                     try (java.io.InputStream in = inputFile.newStream();
-                            java.io.OutputStream localOut = Files.newOutputStream(Paths.get(localFilePath))) {
+                            java.io.OutputStream localOut = Files.newOutputStream(Path.of(localFilePath))) {
                         copyStream(in, localOut);
                     }
-                    byte[] bytes = Files.readAllBytes(Paths.get(localFilePath));
+                    byte[] bytes = Files.readAllBytes(Path.of(localFilePath));
                     String json = new String(bytes, StandardCharsets.UTF_8);
                     JSONObject root = (JSONObject) JSONValue.parse(json);
                     if (name.compareTo((String) root.get("name")) != 0) {
@@ -675,9 +680,9 @@ public class Repository implements Writable, GsonPostProcessable {
     // remoteFilePath should be FULL path
     public Status upload(String localFilePath, String remoteFilePath) {
         // get md5sum of local file
-        File file = new File(localFilePath);
+        File file = LocalFiles.file(localFilePath);
         String md5sum;
-        try (FileInputStream fis = new FileInputStream(file)) {
+        try (FileInputStream fis = openInputStream(file)) {
             md5sum = DigestUtils.md5Hex(fis);
         } catch (FileNotFoundException e) {
             return new Status(ErrCode.NOT_FOUND, "file " + localFilePath + " does not exist");
@@ -793,13 +798,13 @@ public class Repository implements Writable, GsonPostProcessable {
             // 2. download
             DorisInputFile inputFile = fs.newInputFile(Location.of(remoteFilePathWithChecksum));
             try (java.io.InputStream in = inputFile.newStream();
-                    java.io.OutputStream out = Files.newOutputStream(Paths.get(localFilePath))) {
+                    java.io.OutputStream out = Files.newOutputStream(Path.of(localFilePath))) {
                 copyStream(in, out);
             }
 
             // 3. verify checksum
             String localMd5sum;
-            try (FileInputStream fis = new FileInputStream(localFilePath)) {
+            try (FileInputStream fis = openInputStream(LocalFiles.file(localFilePath))) {
                 localMd5sum = DigestUtils.md5Hex(fis);
             }
             if (!localMd5sum.equals(md5sum)) {

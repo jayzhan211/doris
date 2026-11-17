@@ -20,6 +20,7 @@ package org.apache.doris.journal.bdbje;
 import org.apache.doris.common.Config;
 import org.apache.doris.common.FeMetaVersion;
 import org.apache.doris.common.ThreadPoolManager;
+import org.apache.doris.foundation.util.LocalFiles;
 import org.apache.doris.httpv2.HttpServer;
 import org.apache.doris.journal.JournalEntity;
 import org.apache.doris.meta.MetaContext;
@@ -43,7 +44,6 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
-import java.io.File;
 import java.util.List;
 
 /**
@@ -126,7 +126,7 @@ public class BDBDebugger {
             envConfig.setCachePercent(20);
 
             try {
-                env = new Environment(new File(metaPath), envConfig);
+                env = new Environment(LocalFiles.file(metaPath), envConfig);
             } catch (DatabaseException e) {
                 throw new BDBDebugException("failed to init bdb env", e);
             }

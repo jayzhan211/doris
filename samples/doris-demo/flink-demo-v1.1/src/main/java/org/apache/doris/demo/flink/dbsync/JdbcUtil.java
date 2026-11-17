@@ -50,7 +50,8 @@ public class JdbcUtil {
         Connection con = null;
         try {
             con = DriverManager.getConnection(connectionUrl,user,password);
-            PreparedStatement ps = con.prepareStatement(sql);
+            final String querySql = sql;
+            PreparedStatement ps = con.prepareStatement(querySql);
             ResultSet rs = ps.executeQuery();
             beJson = resultSetToJson(rs);
         } catch (SQLException e) {

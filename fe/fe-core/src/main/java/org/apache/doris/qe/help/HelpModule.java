@@ -18,6 +18,7 @@
 package org.apache.doris.qe.help;
 
 import org.apache.doris.common.UserException;
+import org.apache.doris.foundation.util.LocalFiles;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
@@ -35,7 +36,6 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
@@ -113,7 +113,7 @@ public class HelpModule {
 
                     // note that we only need basename
                     String parentPathStr = null;
-                    Path pathObj = Paths.get(entry.getName());
+                    Path pathObj = Path.of(entry.getName());
                     if (pathObj.getParent() != null) {
                         parentPathStr = pathObj.getParent().getFileName().toString();
                     }
@@ -135,7 +135,7 @@ public class HelpModule {
 
     // process dirs in zip file
     private void setUpDirInZip(String pathInZip) {
-        Path pathObj = Paths.get(pathInZip);
+        Path pathObj = Path.of(pathInZip);
         // Note: we only need 'basename' here, which is the farthest element from the root in the
         // directory hierarchy.
         String pathStr = pathObj.getFileName().toString();
@@ -148,7 +148,7 @@ public class HelpModule {
 
     // for test only
     public void setUp(String path) throws UserException, IOException {
-        File root = new File(path);
+        File root = LocalFiles.file(path);
         if (!root.isDirectory()) {
             throw new UserException("Need help directory.");
         }
@@ -290,7 +290,7 @@ public class HelpModule {
         lastCheckTime = now;
 
         // check zip file's last modify time
-        File file = new File(zipPath);
+        File file = LocalFiles.file(zipPath);
         if (!file.exists()) {
             throw new UserException("zipfile of help module is not exist" + zipPath);
         }

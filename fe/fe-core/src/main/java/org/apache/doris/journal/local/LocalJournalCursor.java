@@ -18,6 +18,7 @@
 package org.apache.doris.journal.local;
 
 import org.apache.doris.common.Pair;
+import org.apache.doris.foundation.util.LocalFiles;
 import org.apache.doris.journal.JournalCursor;
 import org.apache.doris.journal.JournalEntity;
 import org.apache.doris.persist.EditLogFileInputStream;
@@ -30,7 +31,6 @@ import org.apache.logging.log4j.Logger;
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.EOFException;
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
@@ -100,7 +100,7 @@ public final class LocalJournalCursor implements JournalCursor {
         }
 
         this.currentStream = new DataInputStream(new BufferedInputStream(
-                new EditLogFileInputStream(new File(imageDir, "edits." + fileName))));
+                new EditLogFileInputStream(LocalFiles.file(imageDir, "edits." + fileName))));
 
         while (scannedKey < fromKey) {
             getJournalEntity(currentStream);
@@ -124,7 +124,7 @@ public final class LocalJournalCursor implements JournalCursor {
                         if (nextFilePositionIndex < editFileSequenceNumbers.size()) {
                             currentStream.close();
                             currentStream = new DataInputStream(new BufferedInputStream(new EditLogFileInputStream(
-                                    new File(imageDir,
+                                    LocalFiles.file(imageDir,
                                             "edits." + editFileSequenceNumbers.get(nextFilePositionIndex)))));
                             nextFilePositionIndex++;
                             continue;
@@ -136,7 +136,8 @@ public final class LocalJournalCursor implements JournalCursor {
                     if (nextFilePositionIndex < editFileSequenceNumbers.size()) {
                         currentStream.close();
                         currentStream = new DataInputStream(new BufferedInputStream(new EditLogFileInputStream(
-                                new File(imageDir, "edits." + editFileSequenceNumbers.get(nextFilePositionIndex)))));
+                                LocalFiles.file(imageDir,
+                                        "edits." + editFileSequenceNumbers.get(nextFilePositionIndex)))));
                         nextFilePositionIndex++;
                         continue;
                     } else {

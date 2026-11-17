@@ -246,7 +246,8 @@ public abstract class JdbcClient {
         try {
             conn = getConnection();
             stmt = conn.createStatement();
-            int effectedRows = stmt.executeUpdate(origStmt);
+            final String dmlSql = origStmt;
+            int effectedRows = stmt.executeUpdate(dmlSql);
             if (LOG.isDebugEnabled()) {
                 LOG.debug("finished to execute dml stmt: {}, effected rows: {}", origStmt, effectedRows);
             }
@@ -269,7 +270,8 @@ public abstract class JdbcClient {
         List<Column> columns = Lists.newArrayList();
         try {
             conn = getConnection();
-            pstmt = conn.prepareStatement(query);
+            final String columnsQuery = query;
+            pstmt = conn.prepareStatement(columnsQuery);
             ResultSetMetaData metaData = pstmt.getMetaData();
             if (metaData == null) {
                 throw new JdbcClientException("Query not supported: Failed to get ResultSetMetaData from query: %s",
@@ -459,7 +461,7 @@ public abstract class JdbcClient {
             Consumer<ResultSet> resultSetConsumer) {
         Connection conn = null;
         ResultSet standardRs = null;
-        Statement stmt = null;
+        PreparedStatement stmt = null;
         ResultSet customRs = null;
 
         try {
@@ -472,10 +474,9 @@ public abstract class JdbcClient {
             resultSetConsumer.accept(standardRs);
 
             // 2. Process additional tables from custom SQL query (if any)
-            String additionalQuery = getAdditionalTablesQuery(remoteDbName, remoteTableName, tableTypes);
-            if (additionalQuery != null && !additionalQuery.trim().isEmpty()) {
-                stmt = conn.createStatement();
-                customRs = stmt.executeQuery(additionalQuery);
+            stmt = prepareAdditionalTablesQuery(conn, remoteDbName, remoteTableName, tableTypes);
+            if (stmt != null) {
+                customRs = stmt.executeQuery();
                 resultSetConsumer.accept(customRs);
             }
         } catch (SQLException e) {
@@ -529,18 +530,21 @@ public abstract class JdbcClient {
     protected abstract Type jdbcTypeToDoris(JdbcFieldSchema fieldSchema);
 
     /**
-     * Get additional SQL query for tables that cannot be retrieved from standard getTables() method.
+     * Prepare an additional query for tables that cannot be retrieved from standard getTables() method.
      * For example, Oracle SYNONYM tables need custom SQL query.
      * <p>
      * Default implementation returns null, meaning no additional query is needed.
-     * Subclasses can override this method to provide custom SQL queries.
+     * Subclasses can override this method to provide custom SQL queries; they must bind the names as
+     * parameters instead of concatenating them into the SQL text.
      *
+     * @param conn connection the statement is prepared on
      * @param remoteDbName database name
      * @param remoteTableName table name (can be null for all tables)
      * @param tableTypes table types array
-     * @return SQL query string, or null if no additional query needed
+     * @return prepared statement, or null if no additional query needed
      */
-    protected String getAdditionalTablesQuery(String remoteDbName, String remoteTableName, String[] tableTypes) {
+    protected PreparedStatement prepareAdditionalTablesQuery(Connection conn, String remoteDbName,
+            String remoteTableName, String[] tableTypes) throws SQLException {
         // Default implementation: most databases don't need additional queries
         return null;
     }
@@ -553,7 +557,7 @@ public abstract class JdbcClient {
     }
 
     public void testConnection() {
-        String testQuery = getTestQuery();
+        final String testQuery = getTestQuery();
         Connection conn = null;
         Statement stmt = null;
         ResultSet rs = null;

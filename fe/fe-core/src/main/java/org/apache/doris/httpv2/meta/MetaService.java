@@ -20,6 +20,7 @@ package org.apache.doris.httpv2.meta;
 import org.apache.doris.catalog.Env;
 import org.apache.doris.common.Config;
 import org.apache.doris.common.DdlException;
+import org.apache.doris.common.LogUtils;
 import org.apache.doris.common.util.HttpURLUtil;
 import org.apache.doris.common.util.NetUtils;
 import org.apache.doris.common.util.TokenMasker;
@@ -193,7 +194,8 @@ public class MetaService extends RestBaseController {
         String machine = request.getRemoteHost();
 
         LOG.info("put image. clientHost: {}, clientPort: {}, machine: {}, portStr: {}",
-                clientHost, clientPort, machine, portStr);
+                LogUtils.escapeLineBreaks(clientHost), LogUtils.escapeLineBreaks(clientPort), machine,
+                LogUtils.escapeLineBreaks(portStr));
 
         clientHost = Strings.isNullOrEmpty(clientHost) ? machine : clientHost;
         // Use the master-supplied port: Checkpoint sends getHttpPort() (https_port when

@@ -274,8 +274,13 @@ public final class HudiSchemaUtils {
         if (!enableSchemaEvolution) {
             return baseInternalSchema;
         }
-        long commitTime = Long.parseLong(FSUtils.getCommitTime(new File(filePath).getName()));
+        long commitTime = Long.parseLong(FSUtils.getCommitTime(fileName(filePath)));
         return InternalSchemaCache.searchSchemaAndCache(commitTime, metaClient);
+    }
+
+    /** The last name segment of {@code path}, exactly as {@link File#getName()} computes it. */
+    private static String fileName(CharSequence path) {
+        return new File(path.toString()).getName();
     }
 
     // ========== HD-C5b: table schema AT the pinned instant (FOR TIME AS OF over a schema-on-read table) ==========

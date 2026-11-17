@@ -825,7 +825,7 @@ public class MetadataGenerator {
                 || lowerCaseKey.startsWith("secret.")
                 || lowerCaseKey.endsWith(".password")
                 || lowerCaseKey.endsWith("_password")
-                || lowerCaseKey.equals("secret")
+                || "secret".equals(lowerCaseKey)
                 || lowerCaseKey.endsWith(".secret")
                 || lowerCaseKey.endsWith("_secret")
                 || lowerCaseKey.endsWith(".secret_key")

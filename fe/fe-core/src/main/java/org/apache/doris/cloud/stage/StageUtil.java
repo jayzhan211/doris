@@ -52,7 +52,6 @@ import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -278,7 +277,7 @@ public class StageUtil {
         if (matcher == null) {
             return true;
         }
-        Path path = Paths.get(key);
+        Path path = Path.of(key);
         return matcher.matches(path);
     }
 

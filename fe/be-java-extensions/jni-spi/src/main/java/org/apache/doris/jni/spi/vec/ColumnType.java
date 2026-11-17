@@ -301,6 +301,11 @@ public class ColumnType {
         return parseType(columnName, hiveType, true);
     }
 
+    /** Returns the index of the first {@code ch} in {@code value}, or -1 when there is none. */
+    private static int firstIndexOf(String value, char ch) {
+        return value.indexOf(ch);
+    }
+
     private static ColumnType parseType(String columnName, String hiveType, boolean encodedStructFields) {
         String originalType = hiveType.trim();
         String lowerCaseType = hiveType.toLowerCase();
@@ -405,8 +410,8 @@ public class ColumnType {
                         length = Integer.parseInt(match.group(1).trim());
                     }
                 } else if (lowerCaseType.startsWith("decimal")) {
-                    int s = lowerCaseType.indexOf('(');
-                    int e = lowerCaseType.indexOf(')');
+                    int s = firstIndexOf(lowerCaseType, '(');
+                    int e = firstIndexOf(lowerCaseType, ')');
                     if (s != -1 && e != -1) {
                         String[] ps = lowerCaseType.substring(s + 1, e).split(",");
                         precision = Integer.parseInt(ps[0].trim());

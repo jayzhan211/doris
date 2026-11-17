@@ -136,7 +136,8 @@ public class JdbcJniWriter extends JniWriter {
             }
 
             LOG.debug("JdbcJniWriter: Preparing insert statement: " + insertSql);
-            preparedStatement = conn.prepareStatement(insertSql);
+            final String preparedInsertSql = insertSql;
+            preparedStatement = conn.prepareStatement(preparedInsertSql);
         } catch (Exception e) {
             throw new JdbcIOException("JdbcJniWriter open failed", e, jdbcPassword, jdbcUrl);
         } finally {

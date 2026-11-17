@@ -252,7 +252,7 @@ public class Storage {
         Properties properties = new Properties();
         setFields(properties);
 
-        writePropertiesToFile(properties, VERSION_FILE);
+        writePropertiesToFile(properties, getVersionFile());
     }
 
     public void writeFrontendRoleAndNodeName(FrontendNodeType role, String nameNode) throws IOException {
@@ -261,17 +261,17 @@ public class Storage {
         properties.setProperty(FRONTEND_ROLE, role.name());
         properties.setProperty(NODE_NAME, nameNode);
 
-        writePropertiesToFile(properties, ROLE_FILE);
+        writePropertiesToFile(properties, getRoleFile());
     }
 
     public void writeClusterMode() throws IOException {
         Properties properties = new Properties();
         properties.setProperty(DEPLOY_MODE, deployMode);
-        writePropertiesToFile(properties, DEPLOY_MODE_FILE);
+        writePropertiesToFile(properties, getModeFile());
     }
 
-    private void writePropertiesToFile(Properties properties, String fileName) throws IOException {
-        RandomAccessFile file = new RandomAccessFile(new File(metaDir, fileName), "rws");
+    private void writePropertiesToFile(Properties properties, File propertiesFile) throws IOException {
+        RandomAccessFile file = new RandomAccessFile(propertiesFile, "rws");
         FileOutputStream out = null;
 
         try {

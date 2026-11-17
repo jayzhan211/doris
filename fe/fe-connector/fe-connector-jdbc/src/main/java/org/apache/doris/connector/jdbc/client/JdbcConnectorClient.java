@@ -319,9 +319,10 @@ public abstract class JdbcConnectorClient implements Closeable {
             return false;
         }
         // Use the catalog connection so URL sessionVariables and server SQL mode are respected.
+        final String sqlModeQuery = "SELECT @@SESSION.sql_mode";
         try (Connection connection = getConnection();
                 java.sql.Statement statement = connection.createStatement();
-                ResultSet result = statement.executeQuery("SELECT @@SESSION.sql_mode")) {
+                ResultSet result = statement.executeQuery(sqlModeQuery)) {
             if (!result.next()) {
                 throw new DorisConnectorException("MySQL did not return its session SQL mode");
             }
@@ -507,7 +508,8 @@ public abstract class JdbcConnectorClient implements Closeable {
         try {
             conn = getConnection();
             stmt = conn.createStatement();
-            int effectedRows = stmt.executeUpdate(origStmt);
+            final String dmlSql = origStmt;
+            int effectedRows = stmt.executeUpdate(dmlSql);
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Finished executing DML stmt: {}, effected rows: {}", origStmt, effectedRows);
             }
@@ -527,7 +529,8 @@ public abstract class JdbcConnectorClient implements Closeable {
         List<JdbcFieldInfo> columns = new ArrayList<>();
         try {
             conn = getConnection();
-            pstmt = conn.prepareStatement(query);
+            final String columnsQuery = query;
+            pstmt = conn.prepareStatement(columnsQuery);
             ResultSetMetaData metaData = pstmt.getMetaData();
             if (metaData == null) {
                 throw new DorisConnectorException(

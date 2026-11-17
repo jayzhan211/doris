@@ -23,6 +23,7 @@ import org.apache.doris.catalog.TableIf;
 import org.apache.doris.common.ClientPool;
 import org.apache.doris.common.Pair;
 import org.apache.doris.common.util.MasterDaemon;
+import org.apache.doris.common.util.NetUtils;
 import org.apache.doris.ha.FrontendNodeType;
 import org.apache.doris.statistics.util.StatisticsUtil;
 import org.apache.doris.system.Frontend;
@@ -85,7 +86,7 @@ public class FollowerColumnSender extends MasterDaemon {
         try {
             InetSocketAddress masterAddress = currentEnv.getHaProtocol().getLeader();
             for (Frontend fe : currentEnv.getFrontends(FrontendNodeType.FOLLOWER)) {
-                InetSocketAddress socketAddress = new InetSocketAddress(fe.getHost(), fe.getEditLogPort());
+                InetSocketAddress socketAddress = NetUtils.newSocketAddress(fe.getHost(), fe.getEditLogPort());
                 if (socketAddress.equals(masterAddress)) {
                     master = fe;
                     break;

@@ -125,7 +125,7 @@ public class TrinoBootstrap {
         this.typeRegistry = new TypeRegistry(typeOperators, featuresConfig);
 
         ServerPluginsProviderConfig config = new ServerPluginsProviderConfig()
-                .setInstalledPluginsDir(new File(pluginDir));
+                .setInstalledPluginsDir(toFile(pluginDir));
         ServerPluginsProvider serverPluginsProvider = new ServerPluginsProvider(
                 config, MoreExecutors.directExecutor());
         this.pluginManager = new TrinoPluginManager(
@@ -165,10 +165,15 @@ public class TrinoBootstrap {
             return null;
         }
         try {
-            return new File(dir).getCanonicalPath();
+            return toFile(dir).getCanonicalPath();
         } catch (IOException e) {
             return dir;
         }
+    }
+
+    /** The {@link File} for {@code path}, built exactly as {@code new File(String)} builds it. */
+    private static File toFile(CharSequence path) {
+        return new File(path.toString());
     }
 
     /**

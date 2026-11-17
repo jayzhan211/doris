@@ -17,6 +17,7 @@
 
 package org.apache.doris.cloud.rpc;
 
+import org.apache.doris.common.util.NetUtils;
 import org.apache.doris.system.SystemInfoService;
 
 import io.grpc.EquivalentAddressGroup;
@@ -27,7 +28,6 @@ import io.grpc.Status;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.URI;
 import java.util.ArrayList;
@@ -102,7 +102,7 @@ public class MetaServiceListResolverProvider extends NameResolverProvider {
                         continue;
                     }
                     SystemInfoService.HostInfo info = SystemInfoService.getHostAndPort(endpoint);
-                    endpoints.add(new InetSocketAddress(info.getHost(), info.getPort()));
+                    endpoints.add(NetUtils.newSocketAddress(info.getHost(), info.getPort()));
                 }
 
                 List<EquivalentAddressGroup> equivalentAddressGroup = endpoints.stream()

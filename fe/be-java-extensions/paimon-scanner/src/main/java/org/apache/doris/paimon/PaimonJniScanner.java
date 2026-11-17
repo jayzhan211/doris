@@ -75,7 +75,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -417,7 +417,7 @@ public class PaimonJniScanner extends JniScanner {
             throw new IOException("Paimon JNI IOManager temp dirs are empty");
         }
         for (String splitDir : splitDirs) {
-            Files.createDirectories(Paths.get(splitDir));
+            Files.createDirectories(Path.of(splitDir));
         }
         if (implClassName == null) {
             return IOManager.create(splitDirs);

@@ -26,7 +26,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.net.Socket;
 
 /**
@@ -139,7 +138,7 @@ public abstract class SecurityChecker {
      */
     protected void doConnect(String host, int port, int connectTimeoutMs) throws IOException {
         try (Socket socket = new Socket()) {
-            socket.connect(new InetSocketAddress(host, port), connectTimeoutMs);
+            socket.connect(new java.net.InetSocketAddress(host, port), connectTimeoutMs);
         }
     }
 }

@@ -109,7 +109,7 @@ public final class HdfsConfigFileLoader {
         String baseDir = resolveHadoopConfigDir();
         for (String resource : resourcesPath.split(",")) {
             String resourcePath = baseDir + resource.trim();
-            File file = new File(resourcePath);
+            File file = toFile(resourcePath);
             if (file.exists() && file.isFile()) {
                 conf.addResource(new Path(file.toURI()));
             } else {
@@ -120,5 +120,13 @@ public final class HdfsConfigFileLoader {
             confMap.put(entry.getKey(), entry.getValue());
         }
         return confMap;
+    }
+
+    /**
+     * Same as {@code new File(path)}; unlike {@code Path.of}, never rejects characters that the
+     * file-name encoding cannot represent.
+     */
+    private static File toFile(CharSequence path) {
+        return new File(path.toString());
     }
 }

@@ -23,6 +23,7 @@ import org.apache.doris.common.io.Text;
 import org.apache.doris.common.util.DebugPointUtil;
 import org.apache.doris.common.util.DebugUtil;
 import org.apache.doris.common.util.SafeStringBuilder;
+import org.apache.doris.foundation.util.LocalFiles;
 import org.apache.doris.nereids.NereidsPlanner;
 import org.apache.doris.nereids.stats.HboPlanInfoProvider;
 import org.apache.doris.nereids.stats.HboPlanStatisticsManager;
@@ -63,6 +64,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -163,7 +165,7 @@ public class Profile {
     // check if the profile file is valid and create a file input stream
     // user need to close the file stream.
     static FileInputStream createPorfileFileInputStream(String path) {
-        File profileFile = new File(path);
+        File profileFile = LocalFiles.file(path);
         if (!profileFile.isFile()) {
             LOG.warn("Profile storage path {} is invalid, its not a file.", profileFile.getAbsolutePath());
             return null;
@@ -183,12 +185,20 @@ public class Profile {
 
         FileInputStream profileMetaFileInputStream = null;
         try {
-            profileMetaFileInputStream = new FileInputStream(path);
+            profileMetaFileInputStream = openInputStream(profileFile);
         } catch (Exception e) {
             LOG.warn("Open profile file {} failed", path, e);
         }
 
         return profileMetaFileInputStream;
+    }
+
+    private static FileInputStream openInputStream(File file) throws FileNotFoundException {
+        return new FileInputStream(file);
+    }
+
+    private static FileOutputStream openOutputStream(File file) throws FileNotFoundException {
+        return new FileOutputStream(file);
     }
 
     // For normal profile, the profile id is a TUniqueId, but for broker load, the profile id is a long.
@@ -222,8 +232,8 @@ public class Profile {
     public static Profile read(String path) {
         FileInputStream fileInputStream = null;
         try {
-            fileInputStream = new FileInputStream(path);
-            File profileFile = new File(path);
+            File profileFile = LocalFiles.file(path);
+            fileInputStream = openInputStream(profileFile);
             long fileSize = profileFile.length();
 
             ZipInputStream zipIn = new ZipInputStream(fileInputStream);
@@ -750,7 +760,7 @@ public class Profile {
                                     + String.valueOf(this.queryFinishTimestamp)
                                     + SEPERATOR + profileId + ".zip";
 
-        File profileFile = new File(profileFilePath);
+        File profileFile = LocalFiles.file(profileFilePath);
         if (profileFile.exists()) {
             LOG.warn("profile directory {} already exists, remove it", profileFile.getAbsolutePath());
             profileFile.delete();
@@ -759,7 +769,7 @@ public class Profile {
         FileOutputStream fileOutputStream = null;
         ZipOutputStream zipOut = null;
         try {
-            fileOutputStream = new FileOutputStream(profileFilePath);
+            fileOutputStream = openOutputStream(profileFile);
             zipOut = new ZipOutputStream(fileOutputStream);
 
             // First create memory stream to hold all data

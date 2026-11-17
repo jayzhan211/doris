@@ -21,6 +21,7 @@ import org.apache.doris.cloud.proto.Cloud;
 import org.apache.doris.cloud.rpc.MetaServiceProxy;
 import org.apache.doris.filesystem.DorisInputFile;
 import org.apache.doris.filesystem.Location;
+import org.apache.doris.foundation.util.LocalFiles;
 import org.apache.doris.fs.FileSystemFactory;
 import org.apache.doris.service.FrontendOptions;
 
@@ -30,7 +31,6 @@ import java.io.File;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
 import java.util.Map;
@@ -120,13 +120,13 @@ public class CloudPluginDownloader {
     private static String doDownload(Cloud.ObjectStoreInfoPB objInfo, String remotePath, String localPath)
             throws Exception {
         // Create parent directory
-        Path parentDir = Paths.get(localPath).getParent();
+        Path parentDir = Path.of(localPath).getParent();
         if (parentDir != null && !Files.exists(parentDir)) {
             Files.createDirectories(parentDir);
         }
 
         // Delete existing file if present
-        File localFile = new File(localPath);
+        File localFile = LocalFiles.file(localPath);
         if (localFile.exists() && !localFile.delete()) {
             throw new RuntimeException("Failed to delete existing file: " + localPath);
         }

@@ -33,6 +33,7 @@ import org.apache.doris.persist.gson.GsonUtils;
 import com.google.common.collect.Lists;
 import com.google.gson.reflect.TypeToken;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -90,7 +91,7 @@ public class FrontendConjunctsUtils {
                 List<String> nameParts = ((UnboundSlot) c).getNameParts();
                 if (!CollectionUtils.isEmpty(nameParts)) {
                     String name = nameParts.get(nameParts.size() - 1).toLowerCase();
-                    return name.equalsIgnoreCase(slotName);
+                    return StringUtils.equalsIgnoreCase(name, slotName);
                 }
             }
             return false;

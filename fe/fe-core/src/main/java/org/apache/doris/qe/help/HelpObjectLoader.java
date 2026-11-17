@@ -28,7 +28,7 @@ import org.apache.logging.log4j.Logger;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
@@ -63,7 +63,7 @@ public abstract class HelpObjectLoader<HelpTypeT extends HelpObjectIface> {
             LOG.error("Help object loader input file is empty.");
             return null;
         }
-        List<String> lines = Files.readAllLines(Paths.get(path), Charset.forName("UTF-8"));
+        List<String> lines = Files.readAllLines(Path.of(path), Charset.forName("UTF-8"));
         return this.loadAll(lines);
     }
 

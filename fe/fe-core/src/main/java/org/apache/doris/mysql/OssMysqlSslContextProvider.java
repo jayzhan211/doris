@@ -35,23 +35,30 @@ public class OssMysqlSslContextProvider implements MysqlSslContextProvider {
     private static final String SERVER_CERTIFICATE_PASSWORD = Config.mysql_ssl_default_server_certificate_password;
     private static final String TRUST_STORE_TYPE = Config.ssl_trust_store_type;
 
+    /** Password of the server certificate keystore, from {@code mysql_ssl_default_server_certificate_password}. */
+    private static char[] serverCertificatePassword() {
+        return SERVER_CERTIFICATE_PASSWORD.toCharArray();
+    }
+
+    /** Password of the CA certificate keystore, from {@code mysql_ssl_default_ca_certificate_password}. */
+    private static char[] caCertificatePassword() {
+        return CA_CERTIFICATE_PASSWORD.toCharArray();
+    }
+
     @Override
     public SSLContext createSslContext(String protocol) throws Exception {
         KeyStore ks = KeyStore.getInstance(TRUST_STORE_TYPE);
         KeyStore ts = KeyStore.getInstance(TRUST_STORE_TYPE);
 
-        char[] serverPassword = SERVER_CERTIFICATE_PASSWORD.toCharArray();
-        char[] caPassword = CA_CERTIFICATE_PASSWORD.toCharArray();
-
         try (InputStream stream = Files.newInputStream(Paths.get(KEY_STORE_FILE))) {
-            ks.load(stream, serverPassword);
+            ks.load(stream, serverCertificatePassword());
         }
         try (InputStream stream = Files.newInputStream(Paths.get(TRUST_STORE_FILE))) {
-            ts.load(stream, caPassword);
+            ts.load(stream, caCertificatePassword());
         }
 
         KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-        kmf.init(ks, serverPassword);
+        kmf.init(ks, serverCertificatePassword());
 
         TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
         tmf.init(ts);

@@ -35,8 +35,8 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.nio.file.FileSystems;
+import java.nio.file.Path;
 import java.nio.file.PathMatcher;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -638,7 +638,7 @@ public class HFUtils {
         try {
             // Use Java's built-in glob pattern matching
             PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:" + globPattern);
-            return matcher.matches(Paths.get(filePath));
+            return matcher.matches(Path.of(filePath));
         } catch (Exception e) {
             LOG.warn("Failed to match glob pattern: {} against file: {}, error: {}",
                     globPattern, filePath, e.getMessage());

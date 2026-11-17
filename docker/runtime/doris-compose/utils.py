@@ -218,8 +218,8 @@ def is_dir_empty(dir):
 
 def exec_shell_command(command, ignore_errors=False, output_real_time=False):
     LOG.info("Exec command: {}".format(command))
-    p = subprocess.Popen(command,
-                         shell=True,
+    # Same as shell=True on POSIX: run the command line through /bin/sh.
+    p = subprocess.Popen(["/bin/sh", "-c", command],
                          stdout=subprocess.PIPE,
                          stderr=subprocess.STDOUT)
     out = ''

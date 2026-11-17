@@ -114,8 +114,8 @@ def inspect_pages_with_cli(file_path, parquet_cli_path=None):
 
     print("\nParquet CLI Output:")
     try:
-        cmd = f"java -jar {parquet_cli_path} pages {file_path}"
-        result = subprocess.run(cmd, shell=True, check=True, capture_output=True, text=True)
+        cmd = ["java", "-jar", parquet_cli_path, "pages", file_path]
+        result = subprocess.run(cmd, check=True, capture_output=True, text=True)
         print(result.stdout)
     except subprocess.CalledProcessError as e:
         print(f"Error running parquet-cli: {e}")

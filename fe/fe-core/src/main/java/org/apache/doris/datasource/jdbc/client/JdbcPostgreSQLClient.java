@@ -75,11 +75,10 @@ public class JdbcPostgreSQLClient extends JdbcClient {
                     PreparedStatement pstmt = null;
                     ResultSet arrayRs = null;
                     try {
-                        pstmt = conn.prepareStatement(
-                                String.format("SELECT array_ndims(\"%s\") FROM \"%s\".\"%s\""
-                                                + " WHERE \"%s\" IS NOT NULL LIMIT 1",
-                                        columnName, remoteDbName, remoteTableName,
-                                        columnName));
+                        final String arrayDimsQuery = String.format(
+                                "SELECT array_ndims(\"%s\") FROM \"%s\".\"%s\" WHERE \"%s\" IS NOT NULL LIMIT 1",
+                                columnName, remoteDbName, remoteTableName, columnName);
+                        pstmt = conn.prepareStatement(arrayDimsQuery);
                         arrayRs = pstmt.executeQuery();
                         if (arrayRs.next()) {
                             arrayDimensions = arrayRs.getInt(1);

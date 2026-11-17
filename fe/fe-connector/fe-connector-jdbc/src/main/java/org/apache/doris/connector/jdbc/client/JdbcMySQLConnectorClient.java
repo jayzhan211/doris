@@ -77,12 +77,14 @@ public class JdbcMySQLConnectorClient extends JdbcConnectorClient {
         try {
             conn = getConnection();
             stmt = conn.createStatement();
-            rs = stmt.executeQuery("SHOW VARIABLES LIKE 'server_identity'");
+            final String serverIdentitySql = "SHOW VARIABLES LIKE 'server_identity'";
+            rs = stmt.executeQuery(serverIdentitySql);
             if (rs.next()) {
                 isDoris = isDorisServerIdentity(rs.getString("Value"));
             } else {
                 closeResources(rs);
-                rs = stmt.executeQuery("SHOW VARIABLES LIKE 'version_comment'");
+                final String versionCommentSql = "SHOW VARIABLES LIKE 'version_comment'";
+                rs = stmt.executeQuery(versionCommentSql);
                 if (rs.next()) {
                     isDoris = isDorisCompatibleVersionComment(rs.getString("Value"));
                 }
@@ -286,7 +288,7 @@ public class JdbcMySQLConnectorClient extends JdbcConnectorClient {
         ResultSet rs = null;
         Map<String, String> fieldToType = new HashMap<>();
 
-        String query = "SHOW FULL COLUMNS FROM `" + remoteTableName + "` FROM `" + remoteDbName + "`";
+        final String query = "SHOW FULL COLUMNS FROM `" + remoteTableName + "` FROM `" + remoteDbName + "`";
         try {
             conn = getConnection();
             stmt = conn.createStatement();
@@ -328,6 +330,11 @@ public class JdbcMySQLConnectorClient extends JdbcConnectorClient {
         return mapSignedType(mysqlType, fieldInfo);
     }
 
+    /** Returns the index of the first '(' in a column type name, or -1 when there is none. */
+    private static int indexOfOpenParen(String typeName) {
+        return typeName.indexOf('(');
+    }
+
     private ConnectorType dorisTypeToConnectorType(String rawType, JdbcFieldInfo fieldInfo) {
         if (rawType == null || rawType.isEmpty()) {
             return ConnectorType.of("UNSUPPORTED");
@@ -345,7 +352,7 @@ public class JdbcMySQLConnectorClient extends JdbcConnectorClient {
             return ConnectorType.arrayOf(dorisTypeToConnectorType(innerType, null));
         }
 
-        int openParen = upperType.indexOf("(");
+        int openParen = indexOfOpenParen(upperType);
         String baseType = (openParen == -1) ? upperType : upperType.substring(0, openParen);
 
         switch (baseType) {

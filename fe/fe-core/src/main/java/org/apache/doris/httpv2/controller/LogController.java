@@ -19,6 +19,7 @@ package org.apache.doris.httpv2.controller;
 
 import org.apache.doris.common.Config;
 import org.apache.doris.common.Log4jConfig;
+import org.apache.doris.common.LogUtils;
 import org.apache.doris.httpv2.HttpAuthManager.SessionValue;
 import org.apache.doris.httpv2.config.ReadEnvironment;
 import org.apache.doris.httpv2.entity.ResponseEntityBuilder;
@@ -78,7 +79,8 @@ public class LogController extends BaseController {
         // get parameters
         String addVerboseName = request.getParameter("add_verbose");
         String delVerboseName = request.getParameter("del_verbose");
-        LOG.info("add verbose name: {}, del verbose name: {}", addVerboseName, delVerboseName);
+        LOG.info("add verbose name: {}, del verbose name: {}", LogUtils.escapeLineBreaks(addVerboseName),
+                LogUtils.escapeLineBreaks(delVerboseName));
         appendLogConf(map, addVerboseName, delVerboseName);
         return ResponseEntityBuilder.ok(map);
     }

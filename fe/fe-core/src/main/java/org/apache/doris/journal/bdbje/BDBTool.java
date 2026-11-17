@@ -20,6 +20,7 @@ package org.apache.doris.journal.bdbje;
 import org.apache.doris.catalog.Env;
 import org.apache.doris.common.LogUtils;
 import org.apache.doris.common.io.Writable;
+import org.apache.doris.foundation.util.LocalFiles;
 import org.apache.doris.journal.JournalEntity;
 import org.apache.doris.meta.MetaContext;
 
@@ -42,7 +43,6 @@ import org.json.simple.JSONObject;
 
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
-import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Map;
@@ -66,7 +66,7 @@ public class BDBTool {
 
         Environment env = null;
         try {
-            env = new Environment(new File(metaPath), envConfig);
+            env = new Environment(LocalFiles.file(metaPath), envConfig);
         } catch (DatabaseException e) {
             LOG.warn("", e);
             LogUtils.stderr("Failed to open BDBJE env: " + Env.getCurrentEnv().getBdbDir() + ". exit");

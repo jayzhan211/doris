@@ -104,7 +104,8 @@ public interface JdbcTypeHandler {
      */
     default PreparedStatement initializeStatement(Connection conn, String sql,
                                                  int fetchSize) throws SQLException {
-        PreparedStatement stmt = conn.prepareStatement(sql,
+        final String querySql = sql;
+        PreparedStatement stmt = conn.prepareStatement(querySql,
                 ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
         stmt.setFetchSize(fetchSize);
         return stmt;

@@ -107,7 +107,8 @@ public class Client {
 
         //query data
         try {
-            ResultSet result = stmt.executeQuery("SELECT * FROM table_test");
+            final String selectSql = "SELECT * FROM table_test";
+            ResultSet result = stmt.executeQuery(selectSql);
             System.out.println("data queried is :");
             while (result.next()) {
                 int siteid = result.getInt("siteid");

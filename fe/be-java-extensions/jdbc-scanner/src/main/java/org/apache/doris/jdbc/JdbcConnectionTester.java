@@ -153,7 +153,8 @@ public class JdbcConnectionTester extends JniScanner {
             }
 
             conn = hikariDataSource.getConnection();
-            stmt = conn.prepareStatement(querySql);
+            final String testSql = querySql;
+            stmt = conn.prepareStatement(testSql);
             ResultSet rs = stmt.executeQuery();
             if (!rs.next()) {
                 throw new IOException(

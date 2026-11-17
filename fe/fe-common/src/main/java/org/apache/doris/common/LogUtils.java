@@ -54,6 +54,17 @@ public class LogUtils {
         System.err.println(STDERR_LOG_MARKER + formattedTime() + " " + message);
     }
 
+    /**
+     * Returns {@code value} with CR and LF written as the two-character escapes {@code \r} and {@code \n}, so a
+     * value taken from a request cannot start a forged line in the log. Returns null for null.
+     */
+    public static String escapeLineBreaks(String value) {
+        if (value == null) {
+            return null;
+        }
+        return value.replace("\r", "\\r").replace("\n", "\\n");
+    }
+
     // TODO: this custom layout is not used in the codebase, but it is a good example of how to create a custom layout
     // 1. Add log4j2.component.properties in fe/conf with content:
     //      log4j.layoutFactory=org.apache.doris.common.LogUtils$SingleLineExceptionLayout

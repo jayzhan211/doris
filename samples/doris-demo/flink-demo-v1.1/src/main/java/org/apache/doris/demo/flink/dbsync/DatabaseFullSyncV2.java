@@ -182,7 +182,7 @@ public class DatabaseFullSyncV2 {
         dorisBuilder.setFenodes(HOST + ":" + DORIS_PORT)
             .setTableIdentifier(TARGET_DORIS_DB + "." + table)
             .setUsername("root")
-            .setPassword("");
+            .setPassword(System.getenv().getOrDefault("DORIS_PASSWORD", ""));
 
         Properties pro = new Properties();
         //json data format

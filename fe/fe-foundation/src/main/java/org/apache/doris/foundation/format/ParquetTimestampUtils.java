@@ -37,9 +37,9 @@ public final class ParquetTimestampUtils {
         }
         try {
             String upperCase = timeZone.toUpperCase(Locale.ROOT);
-            boolean isUtcOrGmt = upperCase.equals("UTC") || upperCase.equals("GMT");
+            boolean isUtcOrGmt = "UTC".equals(upperCase) || "GMT".equals(upperCase);
             if (!isUtcOrGmt && (ZoneId.SHORT_IDS.containsKey(upperCase)
-                    || upperCase.equals("CST") || upperCase.equals("PRC"))) {
+                    || "CST".equals(upperCase) || "PRC".equals(upperCase))) {
                 throw new DateTimeException("Ambiguous short timezone aliases are not supported");
             }
             String prefix = "";

@@ -72,7 +72,7 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
@@ -419,7 +419,7 @@ public class MysqlLoadManager {
             fillByteBufferAsync(context, (ByteBufferNetworkInputStream) inputStream, loadId);
         } else {
             // server side file had already check after analyze.
-            inputStream = Files.newInputStream(Paths.get(file));
+            inputStream = Files.newInputStream(Path.of(file));
         }
         return new InputStreamEntity(inputStream, -1, ContentType.TEXT_PLAIN);
     }

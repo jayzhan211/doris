@@ -35,7 +35,7 @@ import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.InvalidPathException;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.Map;
 
 /**
@@ -107,7 +107,7 @@ public class LocationPath {
 
         // if not get scheme, need consider /path/to/local to no scheme
         try {
-            Paths.get(finalLocation);
+            Path.of(finalLocation);
         } catch (InvalidPathException exception) {
             throw new IllegalArgumentException("Fail to parse scheme, invalid location: " + finalLocation);
         }

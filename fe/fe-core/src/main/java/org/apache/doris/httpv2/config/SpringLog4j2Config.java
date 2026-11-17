@@ -39,13 +39,13 @@ public class SpringLog4j2Config {
             if (!file.exists()) {
                 file.createNewFile();
                 //write file
-                writer = new FileWriter(file);
+                writer = openWriter(file);
                 writer.write(Log4jConfig.getLogXmlConfTemplate());
             } else {
                 file.deleteOnExit();
                 file.createNewFile();
                 //write file
-                writer = new FileWriter(file);
+                writer = openWriter(file);
                 writer.write(Log4jConfig.getLogXmlConfTemplate());
             }
             System.out.println("==============================");
@@ -54,5 +54,9 @@ public class SpringLog4j2Config {
                 writer.close();
             }
         }
+    }
+
+    private static FileWriter openWriter(File file) throws IOException {
+        return new FileWriter(file);
     }
 }

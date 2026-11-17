@@ -58,7 +58,7 @@ final class UserFunctionLoaders {
 
     /** A loader over one downloaded jar. The caller owns it and closes it with the function. */
     static URLClassLoader forJar(String jarPath) throws MalformedURLException, FileNotFoundException {
-        File file = new File(jarPath);
+        File file = toFile(jarPath);
         if (!file.exists()) {
             throw new FileNotFoundException("Can not find local file: " + jarPath);
         }
@@ -129,5 +129,13 @@ final class UserFunctionLoaders {
             }
         }
         return jars;
+    }
+
+    /**
+     * Same as {@code new File(path)}; unlike {@code Path.of}, never rejects characters that the
+     * file-name encoding cannot represent.
+     */
+    private static File toFile(CharSequence path) {
+        return new File(path.toString());
     }
 }

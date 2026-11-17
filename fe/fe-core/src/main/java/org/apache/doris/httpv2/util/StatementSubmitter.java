@@ -109,14 +109,16 @@ public class StatementSubmitter {
 
                 if (!queryCtx.clusterName.isEmpty()) {
                     Statement useStmt = conn.createStatement();
-                    useStmt.execute("use @" + queryCtx.clusterName);
+                    final String useClusterSql = "use @" + queryCtx.clusterName;
+                    useStmt.execute(useClusterSql);
                     useStmt.close();
                 }
 
                 stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
                 stmt.setFetchSize(1000);
 
-                boolean hasResultSet = stmt.execute(queryCtx.stmt);
+                final String userSql = queryCtx.stmt;
+                boolean hasResultSet = stmt.execute(userSql);
 
                 if (hasResultSet) {
                     ResultSet rs = stmt.getResultSet();
