@@ -22,6 +22,8 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"os"
+
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -29,7 +31,8 @@ func main() {
 	host := "127.0.0.1"
 	port := 9030
 	user := "root"
-	password := ""
+	// Empty when DORIS_PASSWORD is unset, which is the default root password.
+	password := os.Getenv("DORIS_PASSWORD")
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/", user, password, host, port)
 
 	//connect to doris

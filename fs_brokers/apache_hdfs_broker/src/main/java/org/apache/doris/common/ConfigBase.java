@@ -17,6 +17,8 @@
 
 package org.apache.doris.common;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -40,11 +42,20 @@ public class ConfigBase {
     public void init(String propfile) throws Exception {
         props = new Properties();
         confClass = this.getClass();
-        try (FileReader fr = new FileReader(propfile)) {
+        try (FileReader fr = openReader(toFile(propfile))) {
             props.load(fr);
         }
         replacedByEnv();
         setFields();
+    }
+
+    private static FileReader openReader(File file) throws FileNotFoundException {
+        return new FileReader(file);
+    }
+
+    /** Same as {@code new File(path)}. */
+    private static File toFile(CharSequence path) {
+        return new File(path.toString());
     }
 
     public static HashMap<String, String> dump() throws Exception {

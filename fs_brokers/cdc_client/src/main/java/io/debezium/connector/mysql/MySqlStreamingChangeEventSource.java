@@ -1295,7 +1295,7 @@ public class MySqlStreamingChangeEventSource
                     KeyStore ks = connection.loadKeyStore(keyFilename, keyPasswordArray);
 
                     KeyManagerFactory kmf = KeyManagerFactory.getInstance("NewSunX509");
-                    kmf.init(ks, keyPasswordArray);
+                    kmf.init(ks, connection.connectionConfig().sslKeyStorePassword());
 
                     keyManagers = kmf.getKeyManagers();
                 } catch (KeyStoreException

@@ -30,6 +30,7 @@ import org.apache.doris.common.util.TimeUtils;
 import org.apache.doris.common.util.Util;
 import org.apache.doris.datasource.CatalogProperty;
 import org.apache.doris.datasource.ExternalCatalog;
+import org.apache.doris.foundation.util.LocalFiles;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
@@ -47,7 +48,6 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -388,15 +388,15 @@ public class JdbcResource extends Resource {
             try {
                 String decoded = new URI(pathOrUrl).getPath();
                 if (decoded != null && !decoded.isEmpty()) {
-                    return Paths.get(decoded);
+                    return LocalFiles.path(decoded);
                 }
             } catch (URISyntaxException ignored) {
                 // fall through to literal stripping below
             }
             int sep = pathOrUrl.indexOf("//");
-            return Paths.get(sep >= 0 ? pathOrUrl.substring(sep + 2) : pathOrUrl.substring("file:".length()));
+            return LocalFiles.path(sep >= 0 ? pathOrUrl.substring(sep + 2) : pathOrUrl.substring("file:".length()));
         }
-        return Paths.get(pathOrUrl);
+        return LocalFiles.path(pathOrUrl);
     }
 
     /**
@@ -426,8 +426,9 @@ public class JdbcResource extends Resource {
     }
 
     private static boolean pathIsUnder(String candidatePath, String basePath) {
-        Path candidate = Paths.get(candidatePath == null || candidatePath.isEmpty() ? "/" : candidatePath).normalize();
-        Path base = Paths.get(basePath == null || basePath.isEmpty() ? "/" : basePath).normalize();
+        Path candidate = LocalFiles.path(
+                candidatePath == null || candidatePath.isEmpty() ? "/" : candidatePath).normalize();
+        Path base = LocalFiles.path(basePath == null || basePath.isEmpty() ? "/" : basePath).normalize();
         return candidate.startsWith(base);
     }
 
@@ -440,9 +441,9 @@ public class JdbcResource extends Resource {
             // from `DORIS_HOME/jdbc_drivers` to `DORIS_HOME/plugins/jdbc_drivers`,
             // so we need to check the old default dir for compatibility.
             String targetPath = defaultDriverUrl + "/" + driverUrl;
-            File targetFile = new File(targetPath);
+            File targetFile = LocalFiles.file(targetPath);
             String oldTargetPath = defaultOldDriverUrl + "/" + driverUrl;
-            File oldTargetFile = new File(oldTargetPath);
+            File oldTargetFile = LocalFiles.file(oldTargetPath);
             if (targetFile.exists()) {
                 // File exists in new default directory
                 return "file://" + targetPath;

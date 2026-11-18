@@ -21,6 +21,7 @@ import org.apache.doris.catalog.Resource;
 import org.apache.doris.catalog.Table;
 import org.apache.doris.common.io.Text;
 import org.apache.doris.common.io.Writable;
+import org.apache.doris.foundation.util.LocalFiles;
 import org.apache.doris.meta.MetaContext;
 import org.apache.doris.persist.gson.GsonPostProcessable;
 import org.apache.doris.persist.gson.GsonUtils;
@@ -35,6 +36,7 @@ import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -94,7 +96,11 @@ public class BackupMeta implements Writable, GsonPostProcessable {
     }
 
     public static BackupMeta fromFile(String filePath, int metaVersion) throws IOException {
-        return fromInputStream(new FileInputStream(filePath), metaVersion);
+        return fromInputStream(openInputStream(LocalFiles.file(filePath)), metaVersion);
+    }
+
+    private static FileInputStream openInputStream(File file) throws FileNotFoundException {
+        return new FileInputStream(file);
     }
 
     public static BackupMeta fromBytes(byte[] bytes, int metaVersion) throws IOException {

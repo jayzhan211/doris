@@ -33,6 +33,7 @@ import org.apache.doris.common.util.JdkUtils;
 import org.apache.doris.common.util.NetUtils;
 import org.apache.doris.common.util.Util;
 import org.apache.doris.datasource.FileCacheAdmissionManager;
+import org.apache.doris.foundation.util.LocalFiles;
 import org.apache.doris.httpv2.HttpServer;
 import org.apache.doris.journal.bdbje.BDBDebugger;
 import org.apache.doris.journal.bdbje.BDBTool;
@@ -62,6 +63,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.lang.management.ManagementFactory;
@@ -554,9 +556,9 @@ public class DorisFE {
     }
 
     private static boolean createAndLockPidFile(String pidFilePath) throws IOException {
-        File pid = new File(pidFilePath);
+        File pid = LocalFiles.file(pidFilePath);
 
-        try (RandomAccessFile file = new RandomAccessFile(pid, "rws")) {
+        try (RandomAccessFile file = openRandomAccessFile(pid, "rws")) {
             FileLock lock = file.getChannel().tryLock();
             if (lock == null) {
                 return false;
@@ -574,6 +576,10 @@ public class DorisFE {
         } catch (IOException e) {
             throw e;
         }
+    }
+
+    private static RandomAccessFile openRandomAccessFile(File file, String mode) throws FileNotFoundException {
+        return new RandomAccessFile(file, mode);
     }
 
     /**

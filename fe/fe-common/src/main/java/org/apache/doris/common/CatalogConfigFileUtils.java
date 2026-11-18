@@ -17,6 +17,8 @@
 
 package org.apache.doris.common;
 
+import org.apache.doris.foundation.util.LocalFiles;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -55,7 +57,7 @@ public class CatalogConfigFileUtils {
         for (String resource : resourcesPath.split(",")) {
             // Construct the full path to the resource file.
             String resourcePath = configDir + resource.trim();
-            File file = new File(resourcePath);
+            File file = LocalFiles.file(resourcePath);
 
             // Check if the file exists and is a regular file; if not, throw an exception.
             if (file.exists() && file.isFile()) {

@@ -24,6 +24,7 @@ import org.apache.doris.common.Config;
 import org.apache.doris.common.DdlException;
 import org.apache.doris.common.io.Text;
 import org.apache.doris.common.io.Writable;
+import org.apache.doris.foundation.util.LocalFiles;
 import org.apache.doris.persist.gson.GsonUtils;
 
 import com.google.common.base.Strings;
@@ -48,7 +49,6 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
-import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.util.Base64;
 import java.util.List;
@@ -402,7 +402,7 @@ public class SmallFileMgr {
             }
             file.createNewFile();
             byte[] decoded = Base64.getDecoder().decode(smallFile.content);
-            try (FileOutputStream outputStream = new FileOutputStream(file)) {
+            try (FileOutputStream outputStream = openOutputStream(file)) {
                 outputStream.write(decoded);
                 outputStream.flush();
             }
@@ -433,8 +433,12 @@ public class SmallFileMgr {
         return md5sum.equalsIgnoreCase(expectedMd5);
     }
 
+    private static FileOutputStream openOutputStream(File file) throws FileNotFoundException {
+        return new FileOutputStream(file);
+    }
+
     private File getAbsoluteFile(long dbId, String catalog, String fileName) {
-        return Paths.get(Config.small_file_dir, String.valueOf(dbId), catalog, fileName)
+        return LocalFiles.path(Config.small_file_dir, String.valueOf(dbId), catalog, fileName)
                 .normalize().toAbsolutePath().toFile();
     }
 

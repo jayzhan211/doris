@@ -18,6 +18,7 @@
 package org.apache.doris.datasource.property.metastore;
 
 import org.apache.doris.foundation.property.ConnectorProperty;
+import org.apache.doris.foundation.util.LocalFiles;
 
 import org.apache.arrow.memory.BufferAllocator;
 import org.apache.commons.lang3.StringUtils;
@@ -25,7 +26,6 @@ import org.lance.namespace.LanceNamespace;
 
 import java.net.URI;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -94,7 +94,7 @@ public class LanceFileSystemMetastoreProperties extends AbstractLanceProperties 
             throw new IllegalArgumentException("Invalid Lance warehouse URI: " + warehouse, e);
         }
         if (uri.getScheme() == null) {
-            Path path = Paths.get(warehouse);
+            Path path = LocalFiles.path(warehouse);
             if (!path.isAbsolute()) {
                 throw new IllegalArgumentException(
                         "Local Lance warehouse must be an absolute path: " + warehouse);

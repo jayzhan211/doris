@@ -91,7 +91,7 @@ public class UdfUtils {
 
     public static URLClassLoader getClassLoader(String jarPath, ClassLoader parent)
             throws MalformedURLException, FileNotFoundException {
-        File file = new File(jarPath);
+        File file = toFile(jarPath);
         if (!file.exists()) {
             throw new FileNotFoundException("Can not find local file: " + jarPath);
         }
@@ -251,5 +251,10 @@ public class UdfUtils {
             bytes[length - 1 - i] = temp;
         }
         return bytes;
+    }
+
+    /** Same as {@code new File(path)}; kept local so the BE JNI classpath needs nothing new. */
+    private static File toFile(CharSequence path) {
+        return new File(path.toString());
     }
 }

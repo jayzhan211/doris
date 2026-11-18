@@ -19,6 +19,7 @@ package org.apache.doris.datasource;
 
 import org.apache.doris.common.Config;
 import org.apache.doris.common.ConfigWatcher;
+import org.apache.doris.foundation.util.LocalFiles;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -205,7 +206,7 @@ public class FileCacheAdmissionManager {
         private static final ObjectMapper MAPPER = new ObjectMapper();
 
         public static List<AdmissionRule> loadRulesFromFile(String filePath) throws Exception {
-            File file = new File(filePath);
+            File file = LocalFiles.file(filePath);
             if (!file.exists()) {
                 throw new IllegalArgumentException("File cache admission JSON file does not exist: " + filePath);
             }

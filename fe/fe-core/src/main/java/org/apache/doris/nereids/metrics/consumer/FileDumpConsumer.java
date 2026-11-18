@@ -17,12 +17,14 @@
 
 package org.apache.doris.nereids.metrics.consumer;
 
+import org.apache.doris.foundation.util.LocalFiles;
 import org.apache.doris.nereids.metrics.Event;
 import org.apache.doris.nereids.metrics.EventConsumer;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -37,7 +39,11 @@ public class FileDumpConsumer extends EventConsumer {
 
     public FileDumpConsumer(Class<? extends Event> eventClass, String fileName) throws FileNotFoundException {
         super(eventClass);
-        this.fs = new FileOutputStream(fileName);
+        this.fs = openOutputStream(LocalFiles.file(fileName));
+    }
+
+    private static FileOutputStream openOutputStream(File file) throws FileNotFoundException {
+        return new FileOutputStream(file);
     }
 
     @Override

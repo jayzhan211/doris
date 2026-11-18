@@ -25,6 +25,7 @@ import org.apache.doris.common.util.S3Util;
 import org.apache.doris.common.util.URI;
 import org.apache.doris.datasource.property.storage.HdfsCompatibleProperties;
 import org.apache.doris.datasource.property.storage.StorageProperties;
+import org.apache.doris.foundation.util.LocalFiles;
 import org.apache.doris.fs.io.DorisInputFile;
 import org.apache.doris.fs.io.DorisOutputFile;
 import org.apache.doris.fs.io.ParsedPath;
@@ -59,7 +60,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -203,10 +203,11 @@ public class DFSFileSystem extends RemoteFileSystem {
         LOG.info("finished to open reader. download {} to {}.", remoteFilePath, localFilePath);
 
         // delete local file if exist
-        File localFile = new File(localFilePath);
+        File localFile = LocalFiles.file(localFilePath);
         if (localFile.exists()) {
             try {
-                Files.walk(Paths.get(localFilePath), FileVisitOption.FOLLOW_LINKS).sorted(Comparator.reverseOrder())
+                Files.walk(LocalFiles.path(localFilePath), FileVisitOption.FOLLOW_LINKS)
+                        .sorted(Comparator.reverseOrder())
                         .map(java.nio.file.Path::toFile).forEach(File::delete);
             } catch (IOException e) {
                 return new Status(Status.ErrCode.COMMON_ERROR,
@@ -404,11 +405,11 @@ public class DFSFileSystem extends RemoteFileSystem {
         FSDataOutputStream fsDataOutputStream = hdfsOpParams.fsDataOutputStream();
         LOG.info("finished to open writer. directly upload to remote path {}.", remotePath);
         // read local file and write remote
-        File localFile = new File(localPath);
+        File localFile = LocalFiles.file(localPath);
         long fileLength = localFile.length();
         byte[] readBuf = new byte[1024];
         Status status = new Status(Status.ErrCode.OK, "");
-        try (BufferedInputStream in = new BufferedInputStream(new FileInputStream(localFile))) {
+        try (BufferedInputStream in = new BufferedInputStream(openInputStream(localFile))) {
             // save the last err msg
             String lastErrMsg = null;
             // save the current write offset of remote file
@@ -451,6 +452,10 @@ public class DFSFileSystem extends RemoteFileSystem {
                     (System.currentTimeMillis() - start));
         }
         return status;
+    }
+
+    private static FileInputStream openInputStream(File file) throws FileNotFoundException {
+        return new FileInputStream(file);
     }
 
     @Override

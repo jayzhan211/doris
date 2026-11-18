@@ -25,6 +25,7 @@ import org.apache.doris.common.util.S3URI;
 import org.apache.doris.common.util.S3Util;
 import org.apache.doris.datasource.property.storage.AzureProperties;
 import org.apache.doris.datasource.property.storage.AzurePropertyUtils;
+import org.apache.doris.foundation.util.LocalFiles;
 import org.apache.doris.fs.remote.RemoteFile;
 
 import com.azure.core.http.rest.PagedIterable;
@@ -380,7 +381,7 @@ public class AzureObjStorage implements ObjStorage<BlobServiceClient> {
                 LOG.debug("try to glob list for azure, remote path {}, orig {}", globPath, remotePath);
             }
             BlobContainerClient client = getClient().getBlobContainerClient(bucket);
-            java.nio.file.Path pathPattern = Paths.get(globPath);
+            java.nio.file.Path pathPattern = LocalFiles.path(globPath);
             if (LOG.isDebugEnabled()) {
                 LOG.debug("azure glob list pathPattern: {}, bucket: {}", pathPattern, bucket);
             }
@@ -495,7 +496,7 @@ public class AzureObjStorage implements ObjStorage<BlobServiceClient> {
 
                     matchCnt++;
                     RemoteFile remoteFile = new RemoteFile(
-                            fileNameOnly ? Paths.get(key).getFileName().toString() : fullPath,
+                            fileNameOnly ? LocalFiles.path(key).getFileName().toString() : fullPath,
                             true, // isFile
                             props.getBlobSize(),
                             props.getBlobSize(),

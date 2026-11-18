@@ -20,6 +20,7 @@ package org.apache.doris.common.util;
 import org.apache.doris.common.Config;
 import org.apache.doris.common.ConfigBase.ConfField;
 import org.apache.doris.common.LogUtils;
+import org.apache.doris.foundation.util.LocalFiles;
 import org.apache.doris.qe.GlobalVariable;
 import org.apache.doris.qe.SessionVariable;
 import org.apache.doris.qe.VariableMgr;
@@ -32,6 +33,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
@@ -122,13 +125,17 @@ public class DocGenerator {
 
     private String readDocTemplate(String templatePath) throws Exception {
         StringBuilder sb = new StringBuilder();
-        try (BufferedReader br = new BufferedReader(new FileReader(templatePath))) {
+        try (BufferedReader br = new BufferedReader(openReader(LocalFiles.file(templatePath)))) {
             String line;
             while ((line = br.readLine()) != null) {
                 sb.append(line).append("\n");
             }
         }
         return sb.toString();
+    }
+
+    private static FileReader openReader(File file) throws FileNotFoundException {
+        return new FileReader(file);
     }
 
     private void writeDoc(String content, String outputPath) throws Exception {

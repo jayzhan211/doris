@@ -18,6 +18,7 @@
 package org.apache.doris.common;
 
 import org.apache.doris.common.util.Daemon;
+import org.apache.doris.foundation.util.LocalFiles;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
@@ -26,7 +27,6 @@ import org.apache.logging.log4j.Logger;
 
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardWatchEventKinds;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchEvent.Kind;
@@ -49,7 +49,7 @@ public class ConfigWatcher extends Daemon {
     public ConfigWatcher(String configPathStr) {
         super("config watcher");
         Preconditions.checkState(!Strings.isNullOrEmpty(configPathStr));
-        configPath = Paths.get(configPathStr);
+        configPath = LocalFiles.path(configPathStr);
     }
 
     @Override

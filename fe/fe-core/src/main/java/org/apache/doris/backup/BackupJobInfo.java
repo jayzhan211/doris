@@ -32,6 +32,7 @@ import org.apache.doris.catalog.View;
 import org.apache.doris.common.Config;
 import org.apache.doris.common.FeConstants;
 import org.apache.doris.common.Version;
+import org.apache.doris.foundation.util.LocalFiles;
 import org.apache.doris.info.PartitionNamesInfo;
 import org.apache.doris.info.TableRefInfo;
 import org.apache.doris.nereids.trees.plans.commands.BackupCommand.BackupContent;
@@ -56,7 +57,6 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -689,7 +689,7 @@ public class BackupJobInfo implements GsonPostProcessable {
     }
 
     public static BackupJobInfo fromFile(String path) throws IOException {
-        byte[] bytes = Files.readAllBytes(Paths.get(path));
+        byte[] bytes = Files.readAllBytes(LocalFiles.path(path));
         String json = new String(bytes, StandardCharsets.UTF_8);
         return genFromJson(json);
     }

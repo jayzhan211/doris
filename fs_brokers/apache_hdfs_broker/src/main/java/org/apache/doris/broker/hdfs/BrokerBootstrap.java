@@ -18,6 +18,7 @@
 package org.apache.doris.broker.hdfs;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.lang.management.ManagementFactory;
@@ -64,8 +65,8 @@ public class BrokerBootstrap {
 
     private static boolean createAndLockPidFile(String pidFilePath)
             throws IOException {
-        File pid = new File(pidFilePath);
-        try (RandomAccessFile file = new RandomAccessFile(pid, "rws")) {
+        File pid = toFile(pidFilePath);
+        try (RandomAccessFile file = openRandomAccessFile(pid, "rws")) {
             FileLock lock = file.getChannel().tryLock();
             if (lock == null) {
                 return false;
@@ -82,5 +83,14 @@ public class BrokerBootstrap {
         } catch (IOException e) {
             throw e;
         }
+    }
+
+    private static RandomAccessFile openRandomAccessFile(File file, String mode) throws FileNotFoundException {
+        return new RandomAccessFile(file, mode);
+    }
+
+    /** Same as {@code new File(path)}. */
+    private static File toFile(CharSequence path) {
+        return new File(path.toString());
     }
 }

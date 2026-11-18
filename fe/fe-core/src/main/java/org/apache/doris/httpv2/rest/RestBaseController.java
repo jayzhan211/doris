@@ -56,6 +56,7 @@ import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collections;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class RestBaseController extends BaseController {
@@ -70,6 +71,8 @@ public class RestBaseController extends BaseController {
     protected static final String SINGLE_REPLICA_KEY = "single_replica";
     protected static final String FORWARD_MASTER_UT_TEST = "forward_master_ut_test";
     private static final Logger LOG = LogManager.getLogger(RestBaseController.class);
+    // Percent-encodes non-ASCII characters (for example in the user info) of the forward-to-master URL.
+    private static final Function<URI, String> URI_TO_ASCII_STRING = URI::toASCIIString;
 
     public ActionAuthorizationInfo executeCheckPassword(HttpServletRequest request,
                                                         HttpServletResponse response) throws UnauthorizedException {
@@ -105,7 +108,7 @@ public class RestBaseController extends BaseController {
             // Preserve the original request path to avoid re-encoding an already encoded URI path.
             URI authorityUri = new URI(request.getScheme(), userInfo, addr.getHostname(),
                     addr.getPort(), null, null, null);
-            String redirectUrl = authorityUri.toASCIIString() + requestPath;
+            String redirectUrl = URI_TO_ASCII_STRING.apply(authorityUri) + requestPath;
             if (!Strings.isNullOrEmpty(queryString)) {
                 redirectUrl += "?" + queryString;
             }
@@ -163,7 +166,7 @@ public class RestBaseController extends BaseController {
     public void getFile(HttpServletRequest request, HttpServletResponse response, Object obj, String fileName)
             throws IOException {
         response.setHeader("Content-type", "application/octet-stream");
-        response.addHeader("Content-Disposition", "attachment;fileName=" + fileName); // set file name
+        response.setHeader("Content-Disposition", "attachment;fileName=" + fileName); // set file name
         if (obj instanceof File) {
             File file = (File) obj;
             byte[] buffer = new byte[1024];
@@ -205,7 +208,7 @@ public class RestBaseController extends BaseController {
             HttpServletResponse response, File imageFile) throws IOException {
         Preconditions.checkArgument(imageFile != null && imageFile.exists());
         response.setHeader("Content-type", "application/octet-stream");
-        response.addHeader("Content-Disposition", "attachment;fileName=" + imageFile.getName());
+        response.setHeader("Content-Disposition", "attachment;fileName=" + imageFile.getName());
         response.setHeader(MetaHelper.X_IMAGE_SIZE, imageFile.length() + "");
         response.setHeader(MetaHelper.X_IMAGE_MD5, DigestUtils.md5Hex(new FileInputStream(imageFile)));
         getFile(request, response, imageFile, imageFile.getName());

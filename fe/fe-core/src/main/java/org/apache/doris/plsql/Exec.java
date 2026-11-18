@@ -21,6 +21,7 @@
 package org.apache.doris.plsql;
 
 import org.apache.doris.common.ErrorCode;
+import org.apache.doris.foundation.util.LocalFiles;
 import org.apache.doris.nereids.PLLexer;
 import org.apache.doris.nereids.PLParser;
 import org.apache.doris.nereids.PLParser.Allocate_cursor_stmtContext;
@@ -1026,7 +1027,7 @@ public class Exec extends org.apache.doris.nereids.PLParserBaseVisitor<Integer> 
      */
     boolean includeFile(String file, boolean showError) {
         try {
-            String content = FileUtils.readFileToString(new java.io.File(file), "UTF-8");
+            String content = FileUtils.readFileToString(LocalFiles.file(file), "UTF-8");
             if (content != null && !content.isEmpty()) {
                 if (trace) {
                     trace(null, "INCLUDE CONTENT " + file + " (non-empty)");

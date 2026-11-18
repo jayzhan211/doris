@@ -18,6 +18,7 @@
 package org.apache.doris.common.parquet;
 
 import org.apache.doris.analysis.BrokerDesc;
+import org.apache.doris.foundation.util.LocalFiles;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
@@ -35,7 +36,6 @@ import org.apache.parquet.io.RecordReader;
 import org.apache.parquet.schema.MessageType;
 import org.apache.parquet.schema.Type;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
@@ -54,7 +54,7 @@ public class ParquetReader {
     }
 
     public static ParquetReader create(String filePath) throws IOException {
-        LocalInputFile inputFile = new LocalInputFile(new File(filePath));
+        LocalInputFile inputFile = new LocalInputFile(LocalFiles.file(filePath));
         return new ParquetReader(inputFile);
     }
 

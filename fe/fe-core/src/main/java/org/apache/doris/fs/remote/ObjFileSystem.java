@@ -19,6 +19,7 @@ package org.apache.doris.fs.remote;
 
 import org.apache.doris.analysis.StorageBackend;
 import org.apache.doris.backup.Status;
+import org.apache.doris.foundation.util.LocalFiles;
 import org.apache.doris.fs.obj.ObjStorage;
 
 import org.apache.logging.log4j.LogManager;
@@ -32,7 +33,6 @@ import java.io.IOException;
 import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Map;
@@ -73,10 +73,10 @@ public abstract class ObjFileSystem extends RemoteFileSystem {
     public Status downloadWithFileSize(String remoteFilePath, String localFilePath, long fileSize) {
         long start = System.currentTimeMillis();
         // Write the data to a local file
-        File localFile = new File(localFilePath);
+        File localFile = LocalFiles.file(localFilePath);
         if (localFile.exists()) {
             try {
-                Files.walk(Paths.get(localFilePath), FileVisitOption.FOLLOW_LINKS)
+                Files.walk(LocalFiles.path(localFilePath), FileVisitOption.FOLLOW_LINKS)
                         .sorted(Comparator.reverseOrder())
                         .map(Path::toFile)
                         .forEach(File::delete);
@@ -114,10 +114,10 @@ public abstract class ObjFileSystem extends RemoteFileSystem {
 
     @Override
     public Status upload(String localPath, String remotePath) {
-        File localFile = new File(localPath);
+        File localFile = LocalFiles.file(localPath);
         Status st = null;
         try {
-            st = objStorage.putObject(remotePath, new FileInputStream(localFile), localFile.length());
+            st = objStorage.putObject(remotePath, openInputStream(localFile), localFile.length());
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -126,6 +126,10 @@ public abstract class ObjFileSystem extends RemoteFileSystem {
         }
         LOG.info("upload file " + localPath + " success.");
         return Status.OK;
+    }
+
+    private static FileInputStream openInputStream(File file) throws FileNotFoundException {
+        return new FileInputStream(file);
     }
 
     @Override

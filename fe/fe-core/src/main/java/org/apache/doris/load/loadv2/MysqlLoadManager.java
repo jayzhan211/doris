@@ -32,6 +32,7 @@ import org.apache.doris.common.UserException;
 import org.apache.doris.common.io.ByteBufferNetworkInputStream;
 import org.apache.doris.datasource.property.fileformat.CsvFileFormatProperties;
 import org.apache.doris.datasource.property.fileformat.FileFormatProperties;
+import org.apache.doris.foundation.util.LocalFiles;
 import org.apache.doris.httpv2.rest.manager.HttpUtils;
 import org.apache.doris.load.LoadJobRowResult;
 import org.apache.doris.load.StreamLoadHandler;
@@ -70,7 +71,6 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
@@ -417,7 +417,7 @@ public class MysqlLoadManager {
             fillByteBufferAsync(context, (ByteBufferNetworkInputStream) inputStream, loadId);
         } else {
             // server side file had already check after analyze.
-            inputStream = Files.newInputStream(Paths.get(file));
+            inputStream = Files.newInputStream(LocalFiles.path(file));
         }
         return new InputStreamEntity(inputStream, -1, ContentType.TEXT_PLAIN);
     }

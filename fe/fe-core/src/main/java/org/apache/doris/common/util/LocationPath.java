@@ -21,6 +21,7 @@ import org.apache.doris.common.UserException;
 import org.apache.doris.datasource.property.storage.AzurePropertyUtils;
 import org.apache.doris.datasource.property.storage.StorageProperties;
 import org.apache.doris.foundation.property.StoragePropertiesException;
+import org.apache.doris.foundation.util.LocalFiles;
 import org.apache.doris.fs.FileSystemType;
 import org.apache.doris.fs.SchemaTypeMapper;
 import org.apache.doris.thrift.TFileType;
@@ -36,7 +37,6 @@ import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.InvalidPathException;
-import java.nio.file.Paths;
 import java.util.Map;
 import java.util.UUID;
 
@@ -109,7 +109,7 @@ public class LocationPath {
 
         // if not get scheme, need consider /path/to/local to no scheme
         try {
-            Paths.get(finalLocation);
+            LocalFiles.path(finalLocation);
         } catch (InvalidPathException exception) {
             throw new IllegalArgumentException("Fail to parse scheme, invalid location: " + finalLocation);
         }

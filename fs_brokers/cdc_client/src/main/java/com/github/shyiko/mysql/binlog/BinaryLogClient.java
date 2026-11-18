@@ -64,7 +64,6 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import java.io.EOFException;
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketException;
 import java.security.GeneralSecurityException;
@@ -670,7 +669,7 @@ public class BinaryLogClient implements BinaryLogClientMXBean {
 
     private PacketChannel openChannel() throws IOException {
         Socket socket = socketFactory != null ? socketFactory.createSocket() : new Socket();
-        socket.connect(new InetSocketAddress(hostname, port), (int) connectTimeout);
+        socket.connect(new java.net.InetSocketAddress(hostname, port), (int) connectTimeout);
         return new PacketChannel(socket);
     }
 

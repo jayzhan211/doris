@@ -28,6 +28,7 @@ import org.apache.doris.common.UserException;
 import org.apache.doris.common.util.BrokerUtil;
 import org.apache.doris.datasource.property.storage.BrokerProperties;
 import org.apache.doris.datasource.property.storage.StorageProperties;
+import org.apache.doris.foundation.util.LocalFiles;
 import org.apache.doris.fs.operations.BrokerFileOperations;
 import org.apache.doris.fs.operations.OpParams;
 import org.apache.doris.service.FrontendOptions;
@@ -68,7 +69,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Comparator;
 import java.util.List;
 
@@ -179,10 +179,10 @@ public class BrokerFileSystem extends RemoteFileSystem {
                 fd, remoteFilePath, localFilePath);
         Preconditions.checkNotNull(fd);
         // 3. delete local file if exist
-        File localFile = new File(localFilePath);
+        File localFile = LocalFiles.file(localFilePath);
         if (localFile.exists()) {
             try {
-                Files.walk(Paths.get(localFilePath), FileVisitOption.FOLLOW_LINKS)
+                Files.walk(LocalFiles.path(localFilePath), FileVisitOption.FOLLOW_LINKS)
                         .sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
             } catch (IOException e) {
                 return new Status(Status.ErrCode.COMMON_ERROR, "failed to delete exist local file: " + localFilePath);
@@ -202,7 +202,7 @@ public class BrokerFileSystem extends RemoteFileSystem {
 
         // 5. read remote file with broker and write to local
         String lastErrMsg = null;
-        try (BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(localFile))) {
+        try (BufferedOutputStream out = new BufferedOutputStream(openOutputStream(localFile))) {
             final long bufSize = 1024 * 1024; // 1MB
             long leftSize = fileSize;
             long readOffset = 0;
@@ -318,6 +318,10 @@ public class BrokerFileSystem extends RemoteFileSystem {
         return status;
     }
 
+    private static FileOutputStream openOutputStream(File file) throws FileNotFoundException {
+        return new FileOutputStream(file);
+    }
+
     // directly upload the content to remote file
     @Override
     public Status directUpload(String content, String remoteFile) {
@@ -384,10 +388,10 @@ public class BrokerFileSystem extends RemoteFileSystem {
         }
 
         // 3. read local file and write to remote with broker
-        File localFile = new File(localPath);
+        File localFile = LocalFiles.file(localPath);
         long fileLength = localFile.length();
         byte[] readBuf = new byte[1024];
-        try (BufferedInputStream in = new BufferedInputStream(new FileInputStream(localFile))) {
+        try (BufferedInputStream in = new BufferedInputStream(openInputStream(localFile))) {
             // save the last err msg
             String lastErrMsg = null;
             // save the current write offset of remote file
@@ -485,6 +489,10 @@ public class BrokerFileSystem extends RemoteFileSystem {
                     localPath, remotePath, (System.currentTimeMillis() - start));
         }
         return status;
+    }
+
+    private static FileInputStream openInputStream(File file) throws FileNotFoundException {
+        return new FileInputStream(file);
     }
 
     @Override

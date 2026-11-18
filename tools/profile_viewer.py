@@ -30,7 +30,8 @@ WORK_DIR="./tmp/"
 
 
 def execute_command(cmd: str):
-    result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
+    # Same as shell=True on POSIX: run the command line through /bin/sh.
+    result = subprocess.run(["/bin/sh", "-c", cmd], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
     return result.stdout
 
 def sql(query):

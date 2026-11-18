@@ -183,13 +183,15 @@ public class PostgresSourceReader extends JdbcIncrementalSourceReader {
         try (PostgresConnection conn = dialect.openJdbcConnection();
                 Statement stmt = conn.connection().createStatement()) {
             long count;
-            try (ResultSet rs =
-                    stmt.executeQuery(
-                            "SELECT COUNT(1) FROM pg_publication WHERE pubname = '"
-                                    + pubName
-                                    + "'")) {
-                rs.next();
-                count = rs.getLong(1);
+            try (PreparedStatement countStmt =
+                    conn.connection()
+                            .prepareStatement(
+                                    "SELECT COUNT(1) FROM pg_publication WHERE pubname = ?")) {
+                countStmt.setString(1, pubName);
+                try (ResultSet rs = countStmt.executeQuery()) {
+                    rs.next();
+                    count = rs.getLong(1);
+                }
             }
             if (count == 0) {
                 // Preserve debezium FILTERED behavior: on PG 13+ publish partitioned-root changes
@@ -199,14 +201,17 @@ public class PostgresSourceReader extends JdbcIncrementalSourceReader {
                                         .haveMinimumServerVersion(ServerVersion.v13)
                                 ? " WITH (publish_via_partition_root = true)"
                                 : "";
-                stmt.execute(
+                final String createPublicationSql =
                         "CREATE PUBLICATION "
                                 + pubName
                                 + " FOR TABLE "
                                 + tableList
-                                + pubViaRootSuffix);
+                                + pubViaRootSuffix;
+                stmt.execute(createPublicationSql);
             } else {
-                stmt.execute("ALTER PUBLICATION " + pubName + " SET TABLE " + tableList);
+                final String alterPublicationSql =
+                        "ALTER PUBLICATION " + pubName + " SET TABLE " + tableList;
+                stmt.execute(alterPublicationSql);
             }
             LOG.info("Ensured publication {} for tables {}", pubName, tableList);
         } catch (SQLException e) {
@@ -453,7 +458,7 @@ public class PostgresSourceReader extends JdbcIncrementalSourceReader {
     protected Class<?> probeSplitKeyClass(
             TableId tableId, Column splitColumn, JobBaseConfig jobConfig) {
         PostgresSourceConfig sourceConfig = getSourceConfig(jobConfig);
-        String sql =
+        final String sql =
                 String.format(
                         "SELECT %s FROM %s WHERE 1=0",
                         PostgresQueryUtils.quote(splitColumn.name()),

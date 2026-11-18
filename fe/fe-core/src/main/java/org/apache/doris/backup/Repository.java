@@ -31,6 +31,7 @@ import org.apache.doris.common.util.PrintableMap;
 import org.apache.doris.common.util.TimeUtils;
 import org.apache.doris.datasource.property.storage.BrokerProperties;
 import org.apache.doris.datasource.property.storage.StorageProperties;
+import org.apache.doris.foundation.util.LocalFiles;
 import org.apache.doris.fs.FileSystemFactory;
 import org.apache.doris.fs.PersistentFileSystem;
 import org.apache.doris.fs.remote.BrokerFileSystem;
@@ -508,9 +509,9 @@ public class Repository implements Writable, GsonPostProcessable {
     public Status upload(String localFilePath, String remoteFilePath) {
         // Preconditions.checkArgument(remoteFilePath.startsWith(location), remoteFilePath);
         // get md5usm of local file
-        File file = new File(localFilePath);
+        File file = LocalFiles.file(localFilePath);
         String md5sum;
-        try (FileInputStream fis = new FileInputStream(file)) {
+        try (FileInputStream fis = openInputStream(file)) {
             md5sum = DigestUtils.md5Hex(fis);
         } catch (FileNotFoundException e) {
             return new Status(ErrCode.NOT_FOUND, "file " + localFilePath + " does not exist");
@@ -569,6 +570,10 @@ public class Repository implements Writable, GsonPostProcessable {
         return st;
     }
 
+    private static FileInputStream openInputStream(File file) throws FileNotFoundException {
+        return new FileInputStream(file);
+    }
+
     // remoteFilePath must be a file(not dir) and does not contain checksum
     public Status download(String remoteFilePath, String localFilePath) {
         // 0. list to get to full name(with checksum)
@@ -611,7 +616,7 @@ public class Repository implements Writable, GsonPostProcessable {
 
         // 3. verify checksum
         String localMd5sum = null;
-        try (FileInputStream fis = new FileInputStream(localFilePath)) {
+        try (FileInputStream fis = openInputStream(LocalFiles.file(localFilePath))) {
             localMd5sum = DigestUtils.md5Hex(fis);
         } catch (FileNotFoundException e) {
             return new Status(ErrCode.NOT_FOUND, "file " + localFilePath + " does not exist");

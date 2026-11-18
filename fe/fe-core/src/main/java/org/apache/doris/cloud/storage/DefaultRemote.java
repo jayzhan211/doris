@@ -24,6 +24,7 @@ import org.apache.doris.common.Pair;
 import org.apache.doris.common.ThreadPoolManager;
 import org.apache.doris.datasource.property.common.AwsCredentialsProviderFactory;
 import org.apache.doris.datasource.property.common.AwsCredentialsProviderMode;
+import org.apache.doris.foundation.util.LocalFiles;
 
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
@@ -68,7 +69,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URI;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -394,7 +394,7 @@ public class DefaultRemote extends RemoteBase {
         try {
             GetObjectRequest.Builder getObjectRequest = GetObjectRequest.builder()
                     .bucket(obj.getBucket()).key(key);
-            s3Client.getObject(getObjectRequest.build(), Paths.get(file));
+            s3Client.getObject(getObjectRequest.build(), LocalFiles.path(file));
             LOG.info("Get object for bucket={}, key={}, file={}", obj.getBucket(), key, file);
         } catch (SdkException e) {
             LOG.warn("Failed to get object for S3", e);

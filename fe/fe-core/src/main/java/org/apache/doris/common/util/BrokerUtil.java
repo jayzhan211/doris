@@ -28,6 +28,7 @@ import org.apache.doris.common.FeConstants;
 import org.apache.doris.common.Pair;
 import org.apache.doris.common.UserException;
 import org.apache.doris.datasource.hive.HiveExternalMetaCache;
+import org.apache.doris.foundation.util.LocalFiles;
 import org.apache.doris.fs.FileSystemFactory;
 import org.apache.doris.fs.remote.RemoteFile;
 import org.apache.doris.fs.remote.RemoteFileSystem;
@@ -62,7 +63,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.thrift.TException;
 
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
@@ -410,7 +413,7 @@ public class BrokerUtil {
         ByteBuffer byteBuffer = ByteBuffer.allocate(READ_BUFFER_SIZE_B);
         try {
             writer.open();
-            fis = new FileInputStream(srcFilePath);
+            fis = openInputStream(LocalFiles.file(srcFilePath));
             channel = fis.getChannel();
             while (true) {
                 int readSize = channel.read(byteBuffer);
@@ -440,6 +443,10 @@ public class BrokerUtil {
                 LOG.warn("Close local file failed. srcPath={}", srcFilePath, e);
             }
         }
+    }
+
+    private static FileInputStream openInputStream(File file) throws FileNotFoundException {
+        return new FileInputStream(file);
     }
 
     /**

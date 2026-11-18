@@ -589,16 +589,17 @@ public abstract class BaseJdbcExecutor implements JdbcExecutor {
     }
 
     protected void initializeStatement(Connection conn, JdbcDataSourceConfig config, String sql) throws SQLException {
+        final String statementSql = sql;
         if (config.getOp() == TJdbcOperation.READ) {
             disableAutoCommitIfSupported(conn);
             Preconditions.checkArgument(sql != null, "SQL statement cannot be null for READ operation.");
-            stmt = conn.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+            stmt = conn.prepareStatement(statementSql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             stmt.setFetchSize(config.getBatchSize()); // set fetch size to batch size
             batchSizeNum = config.getBatchSize();
         } else {
             Preconditions.checkArgument(sql != null, "SQL statement cannot be null for WRITE operation.");
             LOG.info("Insert SQL: " + sql);
-            preparedStatement = conn.prepareStatement(sql);
+            preparedStatement = conn.prepareStatement(statementSql);
         }
     }
 

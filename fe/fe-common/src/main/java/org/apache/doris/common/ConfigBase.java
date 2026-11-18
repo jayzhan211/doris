@@ -17,6 +17,8 @@
 
 package org.apache.doris.common;
 
+import org.apache.doris.foundation.util.LocalFiles;
+
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -25,6 +27,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
@@ -149,7 +152,7 @@ public class ConfigBase {
 
     public void initCustom(String customConfFile) throws Exception {
         this.customConfFile = customConfFile;
-        File file = new File(customConfFile);
+        File file = LocalFiles.file(customConfFile);
         if (file.exists() && file.isFile()) {
             // customConfFile is introduced in version 0.14, for compatibility, check if it exist
             // config in customConfFile will overwrite the config in confFile
@@ -159,11 +162,15 @@ public class ConfigBase {
 
     private void initConf(String confFile) throws Exception {
         Properties props = new Properties();
-        try (FileReader fr = new FileReader(confFile)) {
+        try (FileReader fr = openReader(LocalFiles.file(confFile))) {
             props.load(fr);
         }
         replacedByEnv(props);
         setFields(props, isLdapConfig);
+    }
+
+    private static FileReader openReader(File file) throws FileNotFoundException {
+        return new FileReader(file);
     }
 
     // Placeholder returned instead of a sensitive config's real value in any dump API.

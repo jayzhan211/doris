@@ -82,7 +82,8 @@ def write_result(title: str, result: str):
 
 
 def execute_command(cmd: str):
-    result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    # Same as shell=True on POSIX: run the command line through /bin/sh.
+    result = subprocess.run(["/bin/sh", "-c", cmd], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     return result.stdout
 
 

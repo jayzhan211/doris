@@ -27,6 +27,7 @@ import org.apache.doris.common.AnalysisException;
 import org.apache.doris.common.Config;
 import org.apache.doris.common.DdlException;
 import org.apache.doris.common.LoadException;
+import org.apache.doris.common.LogUtils;
 import org.apache.doris.common.Pair;
 import org.apache.doris.common.util.DebugPointUtil;
 import org.apache.doris.httpv2.entity.ResponseEntityBuilder;
@@ -650,7 +651,7 @@ public class LoadAction extends RestBaseController {
 
             LOG.info("Redirect load action with auth token to destination={},"
                             + "stream: {}, db: {}, tbl: {}, label: {}",
-                    redirectAddr.toString(), isStreamLoad, dbName, tableName, label);
+                    redirectAddr.toString(), isStreamLoad, dbName, tableName, LogUtils.escapeLineBreaks(label));
 
             return createRedirectResponse(request, response, redirectAddr, isStreamLoad, dbName, tableName, label);
         } catch (Exception e) {

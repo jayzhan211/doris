@@ -28,6 +28,7 @@ import org.apache.doris.common.AnalysisException;
 import org.apache.doris.common.Config;
 import org.apache.doris.common.proc.FrontendsProcNode;
 import org.apache.doris.common.util.DebugUtil;
+import org.apache.doris.foundation.util.LocalFiles;
 import org.apache.doris.nereids.NereidsPlanner;
 import org.apache.doris.nereids.StatementContext;
 import org.apache.doris.nereids.glue.LogicalPlanAdapter;
@@ -54,6 +55,7 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -108,11 +110,15 @@ public class MinidumpUtils {
         MinidumpUtils.DUMP_FILE_FULL_PATH = dumpPath + ".json";
         MinidumpUtils.HTTP_GET_STRING = "http://" + feAddress + ":" + feHttpPort + "/api/minidump?query_id=" + querId;
         String jsonMinidump = minidump.toString(4);
-        try (FileWriter file = new FileWriter(MinidumpUtils.DUMP_FILE_FULL_PATH)) {
+        try (FileWriter file = openWriter(LocalFiles.file(MinidumpUtils.DUMP_FILE_FULL_PATH))) {
             file.write(jsonMinidump);
         } catch (IOException e) {
             LOG.info("failed to save minidump file", e);
         }
+    }
+
+    private static FileWriter openWriter(File file) throws IOException {
+        return new FileWriter(file);
     }
 
     /**
@@ -200,7 +206,7 @@ public class MinidumpUtils {
      */
     public static Minidump jsonMinidumpLoad(String dumpFilePath) throws Exception {
         // open file, read file, put them into minidump object
-        try (FileInputStream inputStream = new FileInputStream(dumpFilePath)) {
+        try (FileInputStream inputStream = openInputStream(LocalFiles.file(dumpFilePath))) {
             StringBuilder sb = new StringBuilder();
             int ch;
             while ((ch = inputStream.read()) != -1) {
@@ -212,6 +218,10 @@ public class MinidumpUtils {
             LOG.info("failed to open minidump file", e);
         }
         return null;
+    }
+
+    private static FileInputStream openInputStream(File file) throws FileNotFoundException {
+        return new FileInputStream(file);
     }
 
     /**

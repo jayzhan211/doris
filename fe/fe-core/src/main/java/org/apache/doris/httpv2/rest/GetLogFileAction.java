@@ -18,6 +18,7 @@
 package org.apache.doris.httpv2.rest;
 
 import org.apache.doris.common.Config;
+import org.apache.doris.foundation.util.LocalFiles;
 import org.apache.doris.httpv2.controller.BaseController.ActionAuthorizationInfo;
 import org.apache.doris.httpv2.entity.ResponseEntityBuilder;
 
@@ -159,6 +160,6 @@ public class GetLogFileAction extends RestBaseController {
         if ("fe.audit.log".equals(logType)) {
             logPath = Config.audit_log_dir + "/" + logFile;
         }
-        return new File(logPath);
+        return LocalFiles.file(logPath);
     }
 }

@@ -21,6 +21,7 @@ import org.apache.doris.catalog.Env;
 import org.apache.doris.common.Config;
 import org.apache.doris.common.io.IOUtils;
 import org.apache.doris.common.util.HttpURLUtil;
+import org.apache.doris.foundation.util.LocalFiles;
 import org.apache.doris.httpv2.entity.ResponseBody;
 import org.apache.doris.httpv2.rest.manager.HttpUtils;
 import org.apache.doris.persist.gson.GsonUtils;
@@ -86,7 +87,7 @@ public class MetaHelper {
         checkIsValidFileName(filename);
 
         File file = new File(dir, filename + MetaHelper.PART_SUFFIX); // Original file with a specific suffix
-        File newFile = new File(dir, filename); // Target file without the suffix
+        File newFile = LocalFiles.file(dir, filename); // Target file without the suffix
 
         completeCheck(dir, file, newFile);
         // Attempt to rename the file. If it fails, throw an exception

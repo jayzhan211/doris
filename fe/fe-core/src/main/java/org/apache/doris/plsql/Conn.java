@@ -28,6 +28,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Properties;
 import java.util.Stack;
 
 public class Conn {
@@ -64,7 +65,8 @@ public class Conn {
             Statement stmt = conn.createStatement();
             exec.info(null, "Starting query");
             timer.start();
-            ResultSet rs = stmt.executeQuery(query.sql);
+            final String querySql = query.sql;
+            ResultSet rs = stmt.executeQuery(querySql);
             timer.stop();
             query.set(conn, stmt, rs);
             if (info) {
@@ -83,7 +85,8 @@ public class Conn {
         try {
             Connection conn = getConnection(connName);
             timer.start();
-            PreparedStatement stmt = conn.prepareStatement(query.sql);
+            final String querySql = query.sql;
+            PreparedStatement stmt = conn.prepareStatement(querySql);
             timer.stop();
             query.set(conn, stmt);
             if (info) {
@@ -114,7 +117,8 @@ public class Conn {
             Statement s = conn.createStatement();
             for (String sql : sqls) {
                 exec.info(null, "Starting pre-SQL statement");
-                s.execute(sql);
+                final String preSqlText = sql;
+                s.execute(preSqlText);
             }
             s.close();
             preSql.remove(connName);
@@ -140,7 +144,8 @@ public class Conn {
         if (sqls != null) {
             Statement s = c.createStatement();
             for (String sql : sqls) {
-                s.execute(sql);
+                final String initSql = sql;
+                s.execute(initSql);
             }
             s.close();
         }
@@ -180,7 +185,11 @@ public class Conn {
         }
         Class.forName(driver);
         timer.start();
-        Connection conn = DriverManager.getConnection(url.toString().trim(), usr, pwd);
+        // Same as DriverManager.getConnection(url, usr, pwd), which builds exactly these properties.
+        Properties connectionProps = new Properties();
+        connectionProps.put("user", usr);
+        connectionProps.put("password", pwd);
+        Connection conn = DriverManager.getConnection(url.toString().trim(), connectionProps);
         timer.stop();
         if (info) {
             exec.info(null, "Open connection: " + url + " (" + timer.format() + ")");

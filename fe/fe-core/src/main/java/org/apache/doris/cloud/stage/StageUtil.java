@@ -33,6 +33,7 @@ import org.apache.doris.common.Config;
 import org.apache.doris.common.DdlException;
 import org.apache.doris.common.Pair;
 import org.apache.doris.common.UserException;
+import org.apache.doris.foundation.util.LocalFiles;
 import org.apache.doris.mysql.privilege.PrivPredicate;
 import org.apache.doris.qe.ConnectContext;
 import org.apache.doris.thrift.TBrokerFileStatus;
@@ -50,7 +51,6 @@ import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -264,7 +264,7 @@ public class StageUtil {
         if (matcher == null) {
             return true;
         }
-        Path path = Paths.get(key);
+        Path path = LocalFiles.path(key);
         return matcher.matches(path);
     }
 

@@ -28,6 +28,7 @@ import org.apache.doris.datasource.property.common.AwsCredentialsProviderFactory
 import org.apache.doris.datasource.property.common.AwsCredentialsProviderMode;
 import org.apache.doris.datasource.property.storage.AbstractS3CompatibleProperties;
 import org.apache.doris.datasource.property.storage.S3Properties;
+import org.apache.doris.foundation.util.LocalFiles;
 import org.apache.doris.fs.GlobListResult;
 import org.apache.doris.fs.remote.RemoteFile;
 
@@ -675,7 +676,7 @@ public class S3ObjStorage implements ObjStorage<S3Client> {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("globList globPath:{}, remotePath:{}", globPath, remotePath);
             }
-            java.nio.file.Path pathPattern = Paths.get(globPath);
+            java.nio.file.Path pathPattern = LocalFiles.path(globPath);
             PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:" + pathPattern);
             HashSet<String> directorySet = new HashSet<>();
 
@@ -851,7 +852,7 @@ public class S3ObjStorage implements ObjStorage<S3Client> {
 
                     matchCnt++;
                     RemoteFile remoteFile = new RemoteFile(
-                            fileNameOnly ? Paths.get(key).getFileName().toString() : fullPath,
+                            fileNameOnly ? LocalFiles.path(key).getFileName().toString() : fullPath,
                             true, // isFile
                             headResponse.contentLength(),
                             headResponse.contentLength(),

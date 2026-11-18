@@ -40,7 +40,8 @@ public class JdbcDriverManager {
             long start = System.currentTimeMillis();
             Connection conn = DriverManager.getConnection(DB_URL, configuration.user, configuration.password);
             Statement stmt = conn.createStatement();
-            stmt.execute(configuration.sql);
+            final String sql = configuration.sql;
+            stmt.execute(sql);
 
             final ResultSet resultSet = stmt.getResultSet();
             loadJdbcResultSetFunc.load(resultSet);

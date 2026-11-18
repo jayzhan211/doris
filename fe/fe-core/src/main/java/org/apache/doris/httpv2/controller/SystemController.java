@@ -24,6 +24,7 @@ import org.apache.doris.common.proc.ProcDirInterface;
 import org.apache.doris.common.proc.ProcNodeInterface;
 import org.apache.doris.common.proc.ProcResult;
 import org.apache.doris.common.proc.ProcService;
+import org.apache.doris.foundation.util.LocalFiles;
 import org.apache.doris.httpv2.entity.ResponseBody;
 import org.apache.doris.httpv2.entity.ResponseEntityBuilder;
 import org.apache.doris.qe.ConnectContext;
@@ -45,7 +46,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -187,7 +187,7 @@ public class SystemController extends BaseController {
     }
 
     private String getParentUrl(String pathStr) {
-        Path path = Paths.get(pathStr);
+        Path path = LocalFiles.path(pathStr);
         path = path.getParent();
         if (path == null) {
             return "/rest/v1/system";

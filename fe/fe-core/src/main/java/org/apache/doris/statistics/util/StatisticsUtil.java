@@ -50,6 +50,7 @@ import org.apache.doris.common.AnalysisException;
 import org.apache.doris.common.Config;
 import org.apache.doris.common.FeConstants;
 import org.apache.doris.common.Pair;
+import org.apache.doris.common.util.NetUtils;
 import org.apache.doris.common.util.TimeUtils;
 import org.apache.doris.datasource.CatalogIf;
 import org.apache.doris.datasource.ExternalTable;
@@ -817,7 +818,7 @@ public class StatisticsUtil {
     }
 
     public static boolean isMaster(Frontend frontend) {
-        InetSocketAddress socketAddress = new InetSocketAddress(frontend.getHost(), frontend.getEditLogPort());
+        InetSocketAddress socketAddress = NetUtils.newSocketAddress(frontend.getHost(), frontend.getEditLogPort());
         return Env.getCurrentEnv().getHaProtocol().getLeader().equals(socketAddress);
     }
 

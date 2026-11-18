@@ -118,7 +118,7 @@ public class FlinkOracleCdcDemo {
                                 .setFenodes("127.0.0.1:8030")
                                 .setTableIdentifier("db_name.table_name")
                                 .setUsername("root")
-                                .setPassword("").build()
+                                .setPassword(System.getenv().getOrDefault("DORIS_PASSWORD", "")).build()
                 ));
 
         env.execute("flink oracle cdc");

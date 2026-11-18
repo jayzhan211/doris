@@ -20,6 +20,7 @@ package org.apache.hudi.common.util.collection;
 
 import org.apache.hudi.common.util.FileIOUtils;
 
+import org.apache.doris.foundation.util.LocalFiles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,7 +60,7 @@ public abstract class DiskMap<T extends Serializable, R extends Serializable> im
 
   public DiskMap(String basePath, String prefix) throws IOException {
     this.diskMapPath = String.format("%s/%s-%s-%s", basePath, SUBFOLDER_PREFIX, prefix, UUID.randomUUID().toString());
-    diskMapPathFile = new File(diskMapPath);
+    diskMapPathFile = LocalFiles.file(diskMapPath);
     FileIOUtils.deleteDirectory(diskMapPathFile);
     FileIOUtils.mkdir(diskMapPathFile);
     // Make sure the folder is deleted when JVM exits
@@ -160,7 +161,7 @@ public abstract class DiskMap<T extends Serializable, R extends Serializable> im
      */
     public static void cleanupDirectory(String directoryPath) {
       try {
-        FileIOUtils.deleteDirectory(new File(directoryPath));
+        FileIOUtils.deleteDirectory(LocalFiles.file(directoryPath));
       } catch (IOException exception) {
         CLEANER_LOG.warn("Error while deleting the disk map directory=" + directoryPath, exception);
       }

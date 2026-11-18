@@ -295,6 +295,11 @@ public class ColumnType {
         return parseType(columnName, hiveType, true);
     }
 
+    /** Returns the index of the first {@code str} in {@code value}, or -1 when there is none. */
+    private static int firstIndexOf(String value, String str) {
+        return value.indexOf(str);
+    }
+
     private static ColumnType parseType(String columnName, String hiveType, boolean encodedStructFields) {
         String originalType = hiveType.trim();
         String lowerCaseType = hiveType.toLowerCase();
@@ -392,8 +397,8 @@ public class ColumnType {
                         length = Integer.parseInt(match.group(1).trim());
                     }
                 } else if (lowerCaseType.startsWith("decimal")) {
-                    int s = lowerCaseType.indexOf('(');
-                    int e = lowerCaseType.indexOf(')');
+                    int s = firstIndexOf(lowerCaseType, "(");
+                    int e = firstIndexOf(lowerCaseType, ")");
                     if (s != -1 && e != -1) {
                         String[] ps = lowerCaseType.substring(s + 1, e).split(",");
                         precision = Integer.parseInt(ps[0].trim());
@@ -417,7 +422,7 @@ public class ColumnType {
                         }
                     }
                 } else if (lowerCaseType.startsWith("array")) {
-                    if (lowerCaseType.indexOf("<") == 5
+                    if (firstIndexOf(lowerCaseType, "<") == 5
                             && lowerCaseType.lastIndexOf(">") == lowerCaseType.length() - 1) {
                         ColumnType nestedType = parseType("element",
                                 originalType.substring(6, originalType.length() - 1), encodedStructFields);

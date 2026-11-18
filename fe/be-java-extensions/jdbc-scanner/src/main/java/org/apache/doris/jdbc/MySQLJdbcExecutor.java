@@ -70,15 +70,16 @@ public class MySQLJdbcExecutor extends BaseJdbcExecutor {
 
     @Override
     protected void initializeStatement(Connection conn, JdbcDataSourceConfig config, String sql) throws SQLException {
+        final String statementSql = sql;
         if (config.getOp() == TJdbcOperation.READ) {
             conn.setAutoCommit(false);
             Preconditions.checkArgument(sql != null, "SQL statement cannot be null for READ operation.");
-            stmt = conn.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+            stmt = conn.prepareStatement(statementSql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             stmt.setFetchSize(Integer.MIN_VALUE);  // MySQL: signal streaming results with Integer.MIN_VALUE
             batchSizeNum = config.getBatchSize();
         } else {
             LOG.info("Insert SQL: " + sql);
-            preparedStatement = conn.prepareStatement(sql);
+            preparedStatement = conn.prepareStatement(statementSql);
         }
     }
 
