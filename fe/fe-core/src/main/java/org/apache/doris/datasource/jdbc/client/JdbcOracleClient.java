@@ -28,9 +28,9 @@ import com.google.common.collect.Lists;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.List;
 import java.util.Set;
 
@@ -55,7 +55,8 @@ public class JdbcOracleClient extends JdbcClient {
         Connection conn = null;
         ResultSet rs = null;
         List<JdbcFieldSchema> tableSchema = Lists.newArrayList();
-        Statement stmt = null;
+        PreparedStatement isSynonymStmt = null;
+        PreparedStatement synonymInfoStmt = null;
         ResultSet isSynonymRs = null;
         ResultSet synonymInfoRs = null;
         try {
@@ -83,14 +84,15 @@ public class JdbcOracleClient extends JdbcClient {
             }
             if (tableSchema.isEmpty()) {
                 // maybe the table is a synonym
-                stmt = conn.createStatement();
-                isSynonymRs = stmt.executeQuery(
-                        "SELECT OBJECT_TYPE FROM ALL_OBJECTS WHERE OBJECT_NAME = '" + remoteTableName
-                                + "' AND OWNER = '" + remoteDbName + "'");
+                isSynonymStmt = conn.prepareStatement(
+                        "SELECT OBJECT_TYPE FROM ALL_OBJECTS WHERE OBJECT_NAME = ? AND OWNER = ?");
+                isSynonymStmt.setString(1, remoteTableName);
+                isSynonymStmt.setString(2, remoteDbName);
+                isSynonymRs = isSynonymStmt.executeQuery();
                 if (isSynonymRs.next() && "SYNONYM".equalsIgnoreCase(isSynonymRs.getString("OBJECT_TYPE"))) {
                     // if it is a synonym, get the actual table name and owner(database)
-                    String additionalTablesQuery = getAdditionalTablesQuery(remoteDbName, remoteTableName, null);
-                    synonymInfoRs = stmt.executeQuery(additionalTablesQuery);
+                    synonymInfoStmt = prepareAdditionalTablesQuery(conn, remoteDbName, remoteTableName, null);
+                    synonymInfoRs = synonymInfoStmt.executeQuery();
                     while (synonymInfoRs.next()) {
                         String baseTableName = synonymInfoRs.getString("BASE_TABLE_NAME");
                         String baseTableOwner = synonymInfoRs.getString("BASE_TABLE_OWNER");
@@ -102,7 +104,7 @@ public class JdbcOracleClient extends JdbcClient {
             throw new JdbcClientException("failed to get table name list from jdbc for table %s:%s", e, remoteTableName,
                 Util.getRootCauseMessage(e));
         } finally {
-            close(rs, conn, stmt, isSynonymRs, synonymInfoRs);
+            close(rs, isSynonymRs, synonymInfoRs, isSynonymStmt, synonymInfoStmt, conn);
         }
         return tableSchema;
     }
@@ -127,21 +129,30 @@ public class JdbcOracleClient extends JdbcClient {
     }
 
     @Override
-    protected String getAdditionalTablesQuery(String remoteDbName, String remoteTableName, String[] tableTypes) {
+    protected PreparedStatement prepareAdditionalTablesQuery(Connection conn, String remoteDbName,
+            String remoteTableName, String[] tableTypes) throws SQLException {
         StringBuilder sb = new StringBuilder(
                 "SELECT SYNONYM_NAME as TABLE_NAME, TABLE_OWNER as BASE_TABLE_OWNER, TABLE_NAME as BASE_TABLE_NAME "
                         + "FROM ALL_SYNONYMS");
         List<String> conditions = Lists.newArrayList();
+        List<String> params = Lists.newArrayList();
         if (!Strings.isNullOrEmpty(remoteDbName)) {
-            conditions.add("OWNER = '" + remoteDbName + "'");
+            conditions.add("OWNER = ?");
+            params.add(remoteDbName);
         }
         if (!Strings.isNullOrEmpty(remoteTableName)) {
-            conditions.add("SYNONYM_NAME = '" + remoteTableName + "'");
+            conditions.add("SYNONYM_NAME = ?");
+            params.add(remoteTableName);
         }
         if (!conditions.isEmpty()) {
             sb.append(" WHERE ").append(String.join(" AND ", conditions));
         }
-        return sb.toString();
+        final String sql = sb.toString();
+        PreparedStatement stmt = conn.prepareStatement(sql);
+        for (int i = 0; i < params.size(); i++) {
+            stmt.setString(i + 1, params.get(i));
+        }
+        return stmt;
     }
 
     @Override
